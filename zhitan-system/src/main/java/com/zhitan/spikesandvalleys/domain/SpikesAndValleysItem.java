@@ -15,7 +15,6 @@ import java.math.BigDecimal;
  * 【请填写功能名称】对象 spikes_and_valleys_item
  *
  * @author ZhiTan
- * @date 2024-10-29
  */
 @TableName("spikes_and_valleys_item")
 @Data
@@ -44,6 +43,5 @@ public class SpikesAndValleysItem extends BaseEntity {
     /** $column.columnComment */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private String schemeId;
-
 
 }

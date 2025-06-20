@@ -1,10 +1,12 @@
 package com.zhitan.basicdata.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zhitan.common.annotation.Excel;
 import com.zhitan.common.core.domain.BaseEntity;
+import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -14,9 +16,9 @@ import java.util.Date;
 /**
  * 【请填写功能名称】对象 sys_energy
  *
- * @author ZhiTan
- * @date 2024-10-15
+ * @author zhitan
  */
+@Data
 @TableName("sys_energy")
 public class SysEnergy extends BaseEntity {
     private static final long serialVersionUID = 1L;
@@ -74,6 +76,7 @@ public class SysEnergy extends BaseEntity {
     private String note;
 
     /** $column.columnComment */
+    @TableId
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Integer enerid;
 
@@ -102,197 +105,6 @@ public class SysEnergy extends BaseEntity {
     /** 排放因子 */
     @Excel(name = "排放因子")
     private BigDecimal emissionFactors;
-
-        
-    public void setEnername(String enername)
-    {
-        this.enername = enername;
-    }
-
-    public String getEnername()
-    {
-        return enername;
-    }
-        
-    public void setMuid(String muid)
-    {
-        this.muid = muid;
-    }
-
-    public String getMuid()
-    {
-        return muid;
-    }
-        
-    public void setEnerclassid(Integer enerclassid)
-    {
-        this.enerclassid = enerclassid;
-    }
-
-    public Integer getEnerclassid()
-    {
-        return enerclassid;
-    }
-        
-    public void setEnersno(String enersno)
-    {
-        this.enersno = enersno;
-    }
-
-    public String getEnersno()
-    {
-        return enersno;
-    }
-        
-    public void setIsstorage(String isstorage)
-    {
-        this.isstorage = isstorage;
-    }
-
-    public String getIsstorage()
-    {
-        return isstorage;
-    }
-        
-    public void setOprMan(String oprMan)
-    {
-        this.oprMan = oprMan;
-    }
-
-    public String getOprMan()
-    {
-        return oprMan;
-    }
-        
-    public void setOprTime(Date oprTime)
-    {
-        this.oprTime = oprTime;
-    }
-
-    public Date getOprTime()
-    {
-        return oprTime;
-    }
-        
-    public void setModMan(String modMan)
-    {
-        this.modMan = modMan;
-    }
-
-    public String getModMan()
-    {
-        return modMan;
-    }
-        
-    public void setModTime(Date modTime)
-    {
-        this.modTime = modTime;
-    }
-
-    public Date getModTime()
-    {
-        return modTime;
-    }
-        
-    public void setNote(String note)
-    {
-        this.note = note;
-    }
-
-    public String getNote()
-    {
-        return note;
-    }
-        
-    public void setEnerid(Integer enerid)
-    {
-        this.enerid = enerid;
-    }
-
-    public Integer getEnerid()
-    {
-        return enerid;
-    }
-        
-    public void setCoefficient(BigDecimal coefficient)
-    {
-        this.coefficient = coefficient;
-    }
-
-    public BigDecimal getCoefficient()
-    {
-        return coefficient;
-    }
-        
-    public void setExecdate(Date execdate)
-    {
-        this.execdate = execdate;
-    }
-
-    public Date getExecdate()
-    {
-        return execdate;
-    }
-        
-    public void setPrice(BigDecimal price)
-    {
-        this.price = price;
-    }
-
-    public BigDecimal getPrice()
-    {
-        return price;
-    }
-        
-    public void setEmissionFactors(BigDecimal emissionFactors)
-    {
-        this.emissionFactors = emissionFactors;
-    }
-
-    public BigDecimal getEmissionFactors()
-    {
-        return emissionFactors;
-    }
-
-    public String getIsstorageString() {
-        return isstorageString;
-    }
-
-    public void setIsstorageString(String isstorageString) {
-        this.isstorageString = isstorageString;
-    }
-
-    public String getEnerclassname() {
-        return enerclassname;
-    }
-
-    public void setEnerclassname(String enerclassname) {
-        this.enerclassname = enerclassname;
-    }
-
-    public String getCoefficientnote() {
-        return coefficientnote;
-    }
-
-    public void setCoefficientnote(String coefficientnote) {
-        this.coefficientnote = coefficientnote;
-    }
-
-    public Date getCoefficientexecdate() {
-        return coefficientexecdate;
-    }
-
-    public void setCoefficientexecdate(Date coefficientexecdate) {
-        this.coefficientexecdate = coefficientexecdate;
-    }
-
-    public String getMuidString() {
-        return muidString;
-    }
-
-    public void setMuidString(String muidString) {
-        this.muidString = muidString;
-    }
 
     @Override
     public String toString() {

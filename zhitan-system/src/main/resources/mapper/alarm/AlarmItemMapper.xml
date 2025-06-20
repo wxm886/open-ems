@@ -4,7 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.alarm.mapper.AlarmItemMapper">
 
-  <resultMap type="AlarmItem" id="AlarmItemResult">
+  <resultMap type="com.zhitan.alarm.domain.entity.AlarmItem" id="AlarmItemResult">
     <result property="id" column="id"/>
     <result property="createTime" column="create_time"/>
     <result property="createBy" column="create_by"/>
@@ -13,7 +13,7 @@
     <result property="dwid" column="dwid"/>
     <result property="startStop" column="start_stop"/>
     <result property="timeSlot" column="time_slot"/>
-    <result property="limitType" column="limit_type"/>
+    <result property="alarmLimitType" column="limit_type"/>
     <result property="limitVal" column="limit_val"/>
     <result property="alarmLevel" column="alarm_level"/>
     <result property="nodeId" column="node_id"/>
@@ -37,7 +37,7 @@
     from alarm_item
   </sql>
 
-  <select id="selectAlarmItemList" parameterType="AlarmItem" resultMap="AlarmItemResult">
+  <select id="selectAlarmItemList" parameterType="com.zhitan.alarm.domain.entity.AlarmItem" resultMap="AlarmItemResult">
     <include refid="selectAlarmItemVo"/>
     <where>
     </where>
@@ -48,7 +48,7 @@
     where id = #{id}
   </select>
 
-  <insert id="insertAlarmItem" parameterType="AlarmItem">
+  <insert id="insertAlarmItem" parameterType="com.zhitan.alarm.domain.entity.AlarmItem">
     insert into alarm_item
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null  and id != ''">id,</if>
@@ -71,12 +71,12 @@
       <if test="dwid != null  and dwid != ''">#{dwid},</if>
       <if test="startStop != null  and startStop != ''">#{startStop},</if>
       <if test="timeSlot != null  and timeSlot != ''">#{timeSlot},</if>
-      <if test="limitType != null  and limitType != ''">#{limitType},</if>
+      <if test="alarmLimitType != null  and alarmLimitType != ''">#{alarmLimitType},</if>
       <if test="limitVal != null  and limitVal != ''">#{limitVal},</if>
     </trim>
   </insert>
 
-  <update id="updateAlarmItem" parameterType="AlarmItem">
+  <update id="updateAlarmItem" parameterType="com.zhitan.alarm.domain.entity.AlarmItem">
     update alarm_item
     <trim prefix="SET" suffixOverrides=",">
       <if test="createTime != null ">create_time = #{createTime},</if>
@@ -86,7 +86,7 @@
       <if test="dwid != null  and dwid != ''">dwid = #{dwid},</if>
       <if test="startStop != null  and startStop != ''">start_stop = #{startStop},</if>
       <if test="timeSlot != null  and timeSlot != ''">time_slot = #{timeSlot},</if>
-      <if test="limitType != null  and limitType != ''">limit = #{limitType},</if>
+      <if test="alarmLimitType != null  and alarmLimitType != ''">limit = #{alarmLimitType},</if>
       <if test="limitVal != null  and limitVal != ''">limit_val = #{limitVal},</if>
     </trim>
     where id = #{id}
@@ -158,41 +158,6 @@
       </trim>
     </foreach>
   </update>
-<!--  <insert id="updateLimitValNoDel">-->
-<!--    <foreach collection="data" item="item" index="index" separator=";">-->
-<!--      insert into alarm_item-->
-<!--      <trim prefix="(" suffix=")" suffixOverrides=",">-->
-<!--        <if test="id != null  and id != ''">id,</if>-->
-<!--        <if test="item.indexId != null  and item.indexId != ''">dwid,</if>-->
-<!--        <if test="item.state != null  and item.state != ''">start_stop,</if>-->
-<!--        <if test="item.timeSlotVal != null  and item.timeSlotVal != ''">time_slot,</if>-->
-<!--        <if test="item.limitTypeVal != null  and item.limitTypeVal != ''">limit_type,</if>-->
-<!--        <if test="item.limitVal != null  and item.limitVal != ''">limit_val,</if>-->
-<!--        <if test="item.alarmLevel != null  and item.alarmLevel != ''">alarm_level,</if>-->
-<!--        <if test="item.nodeId != null  and item.nodeId != ''">node_id,</if>-->
-<!--        <if test="id != null  and id != ''">update_time,</if>-->
-<!--        <if test="id != null  and id != ''">create_time,</if>-->
-<!--        <if test="id != null  and id != ''">update_by,</if>-->
-<!--        <if test="id != null  and id != ''">create_by,</if>-->
-<!--        <if test="id != null  and id != ''">alarm_code,</if>-->
-<!--      </trim>-->
-<!--      <trim prefix="values (" suffix=")" suffixOverrides=",">-->
-<!--        <if test="id != null  and id != ''">#{item.id},</if>-->
-<!--        <if test="item.indexId != null  and item.indexId != ''">#{item.indexId},</if>-->
-<!--        <if test="item.state != null  and item.state != ''">#{item.state},</if>-->
-<!--        <if test="item.timeSlotVal != null  and item.timeSlotVal != ''">#{item.timeSlotVal},</if>-->
-<!--        <if test="item.limitTypeVal != null  and item.limitTypeVal != ''">#{item.limitTypeVal},</if>-->
-<!--        <if test="item.limitVal != null  and item.limitVal != ''">#{item.limitVal},</if>-->
-<!--        <if test="item.alarmLevel != null  and item.alarmLevel != ''">#{item.alarmLevel},</if>-->
-<!--        <if test="item.nodeId != null  and item.nodeId != ''">#{item.nodeId},</if>-->
-<!--        <if test="id != null  and id != ''">now(),</if>-->
-<!--        <if test="id != null  and id != ''">now(),</if>-->
-<!--        <if test="id != null  and id != ''">#{username},</if>-->
-<!--        <if test="id != null  and id != ''">#{username},</if>-->
-<!--        <if test="id != null  and id != ''">#{item.alarm_code},</if>-->
-<!--      </trim>-->
-<!--    </foreach>-->
-<!--  </insert>-->
   <insert id="updateLimitValNoDel">
     insert into alarm_item (id, create_time, create_by, update_time, update_by, dwid, start_stop, time_slot,
         limit_type,  limit_val, alarm_level, node_id, alarm_code)
@@ -220,7 +185,7 @@
   <select id="getAllAlarmItem" resultMap="AlarmItemResult">
     select ai.*, ei.code as index_code
     from alarm_item ai
-           left join energy_index ei on ai.dwid = ei.index_id
+           left join meter_point ei on ai.dwid = ei.index_id
     where start_stop = '1';
   </select>
 </mapper>

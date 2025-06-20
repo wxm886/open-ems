@@ -10,10 +10,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum EnergyTypeEnum {
 
-    ELECTRICITY(0,"Electricity", "电"),
-    WATER(1,"Water", "水"),
-    GAS(2,"Gas", "天然气"),
-    STEAM(3,"Steam", "蒸汽");
+    ELECTRICITY(0,"electricity", "电"),
+    WATER(1,"water", "水"),
+    GAS(2,"gas", "天然气"),
+    STEAM(3,"steam", "蒸汽");
 
     private final Integer code;
     private final String name;

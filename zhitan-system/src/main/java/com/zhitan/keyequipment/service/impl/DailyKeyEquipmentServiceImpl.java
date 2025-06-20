@@ -1,10 +1,10 @@
 package com.zhitan.keyequipment.service.impl;
 
-import com.zhitan.basicdata.domain.FacilityArchives;
+import com.zhitan.basicdata.domain.Device;
 import com.zhitan.keyequipment.domain.DailyKeyEquipment;
 import com.zhitan.keyequipment.mapper.DailyKeyEquipmentMapper;
 import com.zhitan.keyequipment.service.IDailyKeyEquipmentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -14,12 +14,11 @@ import java.util.List;
 /**
  *重点设备能耗统计 日
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public class DailyKeyEquipmentServiceImpl implements IDailyKeyEquipmentService {
-    @Autowired
     private DailyKeyEquipmentMapper dailyKeyEquipmentMapper;
 
     /**
@@ -47,11 +46,11 @@ public class DailyKeyEquipmentServiceImpl implements IDailyKeyEquipmentService {
         return Collections.emptyList();
     }
     @Override
-    public List<FacilityArchives> getFacilityArchives() {
+    public List<Device> getFacilityArchives() {
         return dailyKeyEquipmentMapper.getFacilityArchives();
     }
     @Override
-    public List<FacilityArchives> getPointFacility() {
+    public List<Device> getPointFacility() {
         return dailyKeyEquipmentMapper.getPointFacility();
     }
 }

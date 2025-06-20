@@ -28,8 +28,6 @@ import java.util.List;
 /**
  * 实时库初连接
  *
- * @Author: Zhujw
- * @Date: 2023/5/24
  */
 @Repository
 @Slf4j

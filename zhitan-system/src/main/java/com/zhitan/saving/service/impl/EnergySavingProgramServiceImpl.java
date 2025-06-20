@@ -14,6 +14,9 @@ import com.zhitan.saving.domain.entity.EnergySavingProgram;
 import com.zhitan.saving.domain.vo.EnergySavingProgramVO;
 import com.zhitan.saving.mapper.EnergySavingProgramMapper;
 import com.zhitan.saving.service.IEnergySavingProgramService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +30,12 @@ import java.util.List;
  * Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-12-26
  */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class EnergySavingProgramServiceImpl extends ServiceImpl<EnergySavingProgramMapper, EnergySavingProgram> implements IEnergySavingProgramService {
-    @Resource
+
     private EnergySavingProgramMapper energySavingProgramMapper;
 
     /**
@@ -43,7 +47,7 @@ public class EnergySavingProgramServiceImpl extends ServiceImpl<EnergySavingProg
      * @return 节能项目管理
      */
     @Override
-    public   EnergySavingProgram selectEnergySavingProgramById(Long id) {
+    public EnergySavingProgram selectEnergySavingProgramById(Long id) {
         return energySavingProgramMapper.selectEnergySavingProgramById(id);
     }
 
@@ -60,10 +64,13 @@ public class EnergySavingProgramServiceImpl extends ServiceImpl<EnergySavingProg
 
         Page<  EnergySavingProgram> pageInfo = PageUtils.getPageInfo(  EnergySavingProgram.class);
 
-
-        Page<  EnergySavingProgram> energySavingProgramPage = this.baseMapper.selectPage(pageInfo,
-                new LambdaQueryWrapper<  EnergySavingProgram>().eq(EnergySavingProgram::getDel, CommonConst.DEL_FLAG_0)
-//                        .eq(ObjectUtils.isNotEmpty(energySavingProgram.getEndTime()), EnergySavingProgram::getEndTime, energySavingProgram.getEndTime())
+        Page<EnergySavingProgram> energySavingProgramPage = this.baseMapper.selectPage(pageInfo,
+                new LambdaQueryWrapper<  EnergySavingProgram>()
+                        .eq(EnergySavingProgram::getDel, CommonConst.DEL_FLAG_0)
+                        .like(ObjectUtils.isNotEmpty(energySavingProgram.getLiablePerson()),
+                                EnergySavingProgram::getLiablePerson, energySavingProgram.getLiablePerson())
+                        .like(ObjectUtils.isNotEmpty(energySavingProgram.getPlan()),
+                                EnergySavingProgram::getPlan,  energySavingProgram.getPlan())
                         .orderByDesc(EnergySavingProgram::getCreateTime)
         );
 

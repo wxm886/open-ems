@@ -10,6 +10,8 @@ import com.zhitan.energydata.vo.PurchaseConsumptionVo;
 import com.zhitan.home.domain.vo.HomePeakValleyVO;
 import com.zhitan.home.service.impl.IHomePageService;
 import com.zhitan.peakvalley.domain.dto.PeakValleyDTO;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,19 +23,16 @@ import java.util.List;
 /**
  * 能源数据综合分析
  *
- * @author ZhiTan
- * @date 2024-10-30
+ * @author zhitan
  */
 @RestController
+@AllArgsConstructor
+@Api(tags = "能源数据综合分析")
 @RequestMapping("/energydatahomepage")
 @Anonymous
 public class EnergyDataStatisticsController extends BaseController
 {
-
-    @Autowired
     public IHomePageService homepageService;
-
-    @Autowired
     private IEnergyDataStatisticService statisticService;
 
     /**

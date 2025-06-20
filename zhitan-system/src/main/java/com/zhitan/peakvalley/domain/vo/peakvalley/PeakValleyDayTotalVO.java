@@ -3,8 +3,7 @@ package com.zhitan.peakvalley.domain.vo.peakvalley;
 /**
  * description 尖峰评估
  *
- * @author hmj
- * @date 2024-10-14 9:40
+ * @author zhitan
  */
 public class PeakValleyDayTotalVO {
 

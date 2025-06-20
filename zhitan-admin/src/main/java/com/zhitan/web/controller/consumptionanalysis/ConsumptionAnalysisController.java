@@ -12,6 +12,8 @@ import com.zhitan.consumptionanalysis.domain.vo.RankingEnergyData;
 import com.zhitan.consumptionanalysis.service.IConsumptionAnalysisService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -33,20 +35,16 @@ import java.util.List;
 /**
  * 统计分析 控制层
  *
- * @Author: Zhujw
- * @Date: 2023/3/1
  */
-@Api(tags = "综合能耗分析")
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "综合能耗分析")
 @RequestMapping("/consumptionanalysis")
 public class ConsumptionAnalysisController extends BaseController {
 
-    @Autowired
     private IConsumptionAnalysisService consumptionAnalysisService;
-
-    @Autowired
     private ISysEnergyService sysEnergyService;
-
 
     @GetMapping("/getByArea")
     @ApiOperation(value = "科室能耗分析列表", notes = "科室能耗分析列表")

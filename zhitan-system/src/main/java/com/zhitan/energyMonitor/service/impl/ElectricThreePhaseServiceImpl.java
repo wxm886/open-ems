@@ -1,9 +1,8 @@
 package com.zhitan.energyMonitor.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import com.zhitan.basicdata.domain.MeterImplement;
-import com.zhitan.basicdata.mapper.MeterImplementMapper;
+import com.zhitan.meter.domain.Meter;
+import com.zhitan.meter.mapper.MeterImplementMapper;
 import com.zhitan.common.constant.CommonConst;
 import com.zhitan.common.constant.TimeTypeConst;
 import com.zhitan.common.utils.*;
@@ -12,9 +11,11 @@ import com.zhitan.energyMonitor.domain.vo.ElectricThreePhaseItem;
 import com.zhitan.energyMonitor.domain.vo.ElectricThreePhaseTempModel;
 import com.zhitan.energyMonitor.domain.vo.ElectricThreePhaseVO;
 import com.zhitan.energyMonitor.service.IElectricThreePhaseService;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.realtimedata.domain.TagValue;
 import com.zhitan.realtimedata.service.RealtimeDatabaseService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.beans.BeanUtils;
@@ -27,18 +28,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description: sensor_alarm_item
- * @Author: jeecg-boot
- * @Date: 2022-04-19
- * @Version: V1.0
- */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class ElectricThreePhaseServiceImpl implements IElectricThreePhaseService {
 
-    @Autowired
     private RealtimeDatabaseService realtimeDatabaseService;
-    @Resource
     private MeterImplementMapper meterImplementMapper;
 
     /**
@@ -46,32 +41,31 @@ public class ElectricThreePhaseServiceImpl implements IElectricThreePhaseService
      *
      * @param timeType        时间类型
      * @param timeCode        时间编码
-     * @param energyIndexList 点位集合
+     * @param meterPointList 点位集合
      * @param requestType     类型
      * @return ElectricThreePhaseVo
-     * @Date 14:27 2022/5/30
      **/
     @Override
-    public ElectricThreePhaseVO list(String timeType, String timeCode, List<EnergyIndex> energyIndexList, String requestType, String meterId) {
+    public ElectricThreePhaseVO list(String timeType, String timeCode, List<MeterPoint> meterPointList, String requestType, String meterId) {
         ElectricThreePhaseVO vo = new ElectricThreePhaseVO();
 
         // 获取电压不平衡数据
         if (CommonConst.STR_NUMBER_0.equals(requestType)) {
-            energyIndexList = energyIndexList.stream()
+            meterPointList = meterPointList.stream()
                     .filter(x -> StringUtil.ifEmptyOrNullReturnValue(x.getCode()).trim().endsWith(CommonConst.TAG_CODE_VOLTAGE_A)
                             || StringUtil.ifEmptyOrNullReturnValue(x.getCode()).trim().endsWith(CommonConst.TAG_CODE_VOLTAGE_B)
                             || StringUtil.ifEmptyOrNullReturnValue(x.getCode()).trim().endsWith(CommonConst.TAG_CODE_VOLTAGE_C)).collect(Collectors.toList());
         } else {
-            energyIndexList = energyIndexList.stream()
+            meterPointList = meterPointList.stream()
                     .filter(x -> StringUtil.ifEmptyOrNullReturnValue(x.getCode()).trim().endsWith(CommonConst.TAG_CODE_CURRENT_A)
                             || StringUtil.ifEmptyOrNullReturnValue(x.getCode()).trim().endsWith(CommonConst.TAG_CODE_CURRENT_B)
                             || StringUtil.ifEmptyOrNullReturnValue(x.getCode()).trim().endsWith(CommonConst.TAG_CODE_CURRENT_C))
                     .collect(Collectors.toList());
         }
-        if (ObjectUtil.isEmpty(energyIndexList)) {
+        if (ObjectUtil.isEmpty(meterPointList)) {
             return vo;
         }
-        List<String> tagCodeList = energyIndexList.stream().map(EnergyIndex::getCode).collect(Collectors.toList());
+        List<String> tagCodeList = meterPointList.stream().map(MeterPoint::getCode).collect(Collectors.toList());
         if(ObjectUtil.isEmpty(tagCodeList)){
             tagCodeList.add(CommonConst.STR_NUMBER_MINUS_ONE);
         }
@@ -112,11 +106,11 @@ public class ElectricThreePhaseServiceImpl implements IElectricThreePhaseService
                 default:
                     break;
             }
-            MeterImplement meterImplement = meterImplementMapper.selectById(meterId);
+            Meter meter = meterImplementMapper.selectById(meterId);
 
             ElectricThreePhaseItem temp = new ElectricThreePhaseItem();
-            if (ObjectUtil.isNotEmpty(meterImplement)) {
-                temp.setName(meterImplement.getMeterName());
+            if (ObjectUtil.isNotEmpty(meter)) {
+                temp.setName(meter.getMeterName());
             }
             temp.setTimeCode(ChartUtils.getTimeCode(timeType, date));
             temp.setTimeCodeChart(ChartUtils.getTimeCodeChart(timeType, date));

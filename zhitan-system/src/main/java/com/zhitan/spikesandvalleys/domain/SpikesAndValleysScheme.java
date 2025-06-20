@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.zhitan.common.core.domain.BaseEntity;
+import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.zhitan.common.annotation.Excel;
@@ -14,8 +15,8 @@ import com.zhitan.common.annotation.Excel;
  * 尖峰平谷时间段明细对象 spikes_and_valleys_scheme
  *
  * @author ZhiTan
- * @date 2024-10-29
  */
+@Data
 @TableName("spikes_and_valleys_scheme")
 public class SpikesAndValleysScheme extends BaseEntity {
     private static final long serialVersionUID = 1L;
@@ -35,47 +36,6 @@ public class SpikesAndValleysScheme extends BaseEntity {
     /** 方案类型1默认2后勤3外部 */
     @Excel(name = "方案类型1默认2后勤3外部")
     private String type;
-
-        
-    public void setId(String id)
-    {
-        this.id = id;
-    }
-
-    public String getId()
-    {
-        return id;
-    }
-        
-    public void setSchemeName(String schemeName)
-    {
-        this.schemeName = schemeName;
-    }
-
-    public String getSchemeName()
-    {
-        return schemeName;
-    }
-        
-    public void setExecuteTime(Date executeTime)
-    {
-        this.executeTime = executeTime;
-    }
-
-    public Date getExecuteTime()
-    {
-        return executeTime;
-    }
-        
-    public void setType(String type)
-    {
-        this.type = type;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
 
     @Override
     public String toString() {

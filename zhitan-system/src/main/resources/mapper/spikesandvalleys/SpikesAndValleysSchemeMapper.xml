@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.spikesandvalleys.mapper.SpikesAndValleysSchemeMapper">
 
-    <resultMap type="SpikesAndValleysScheme" id="SpikesAndValleysSchemeResult">
+    <resultMap type="com.zhitan.spikesandvalleys.domain.SpikesAndValleysScheme" id="SpikesAndValleysSchemeResult">
         <result property="id"    column="id"    />
         <result property="createTime"    column="create_time"    />
         <result property="createBy"    column="create_by"    />
@@ -20,7 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, create_time, create_by, update_time, update_by, remark, scheme_name, execute_time, type from spikes_and_valleys_scheme
     </sql>
 
-    <select id="selectSpikesAndValleysSchemeList" parameterType="SpikesAndValleysScheme" resultMap="SpikesAndValleysSchemeResult">
+    <select id="selectSpikesAndValleysSchemeList" parameterType="com.zhitan.spikesandvalleys.domain.SpikesAndValleysScheme" resultMap="SpikesAndValleysSchemeResult">
         <include refid="selectSpikesAndValleysSchemeVo"/>
         <where>
             <if test="schemeName != null  and schemeName != ''"> and scheme_name like concat('%', #{schemeName}, '%')</if>
@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <insert id="insertSpikesAndValleysScheme" parameterType="SpikesAndValleysScheme">
+    <insert id="insertSpikesAndValleysScheme" parameterType="com.zhitan.spikesandvalleys.domain.SpikesAndValleysScheme">
         insert into spikes_and_valleys_scheme
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null and id != ''">id,</if>
@@ -60,7 +60,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateSpikesAndValleysScheme" parameterType="SpikesAndValleysScheme">
+    <update id="updateSpikesAndValleysScheme" parameterType="com.zhitan.spikesandvalleys.domain.SpikesAndValleysScheme">
         update spikes_and_valleys_scheme
         <trim prefix="SET" suffixOverrides=",">
             <if test="createTime != null">create_time = #{createTime},</if>

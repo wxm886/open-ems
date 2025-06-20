@@ -2,8 +2,6 @@ package com.zhitan.common.constant;
 
 /**
  * @Description: 周期类型
- * @author: yxw
- * @date: 2022年03月17日 12:33
  */
 public class TimeTypeConst {
     /**

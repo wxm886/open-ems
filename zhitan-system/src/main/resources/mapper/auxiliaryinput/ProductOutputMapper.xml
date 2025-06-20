@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.productoutput.mapper.ProductOutputMapper">
 
-    <resultMap type="ProductOutput" id="ProductOutputResult">
+    <resultMap type="com.zhitan.productoutput.domain.ProductOutput" id="ProductOutputResult">
         <result property="productOutputId"    column="product_output_id"    />
         <result property="nodeId"    column="node_id"    />
         <result property="nodeName"    column="node_name"    />
@@ -27,7 +27,7 @@
         select product_output_id, node_name, node_id, time_type, data_time, name, number, unit, del_flag, create_by, create_time, update_by, update_time, remark, data_type,product_type from product_output
     </sql>
 
-    <select id="selectProductOutputList" parameterType="ProductOutput" resultMap="ProductOutputResult">
+    <select id="selectProductOutputList" parameterType="com.zhitan.productoutput.domain.ProductOutput" resultMap="ProductOutputResult">
         <include refid="selectProductOutputVo"/>
         <where>
             <if test="productOutputId != null  and productOutputId != ''"> and product_output_id = #{productOutputId}</if>
@@ -48,7 +48,7 @@
         where  product_output_id = #{productOutputId}
     </select>
 
-    <insert id="insertProductOutput" parameterType="ProductOutput">
+    <insert id="insertProductOutput" parameterType="com.zhitan.productoutput.domain.ProductOutput">
         insert into product_output
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="productOutputId != null">product_output_id,</if>
@@ -88,7 +88,7 @@
         </trim>
     </insert>
 
-    <update id="updateProductOutput" parameterType="ProductOutput">
+    <update id="updateProductOutput" parameterType="com.zhitan.productoutput.domain.ProductOutput">
         update product_output
         <trim prefix="SET" suffixOverrides=",">
             <if test="timeType != null">time_type = #{timeType},</if>

@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.system.mapper.SysDictTypeMapper">
 
-	<resultMap type="SysDictType" id="SysDictTypeResult">
+	<resultMap type="com.zhitan.common.core.domain.entity.SysDictType" id="SysDictTypeResult">
 		<id     property="dictId"     column="dict_id"     />
 		<result property="dictName"   column="dict_name"   />
 		<result property="dictType"   column="dict_type"   />
@@ -20,7 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		from sys_dict_type
     </sql>
 
-	<select id="selectDictTypeList" parameterType="SysDictType" resultMap="SysDictTypeResult">
+	<select id="selectDictTypeList" parameterType="com.zhitan.common.core.domain.entity.SysDictType" resultMap="SysDictTypeResult">
 	    <include refid="selectDictTypeVo"/>
 		<where>
 		    <if test="dictName != null and dictName != ''">

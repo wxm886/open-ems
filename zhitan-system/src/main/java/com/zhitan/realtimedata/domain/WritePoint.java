@@ -2,12 +2,14 @@ package com.zhitan.realtimedata.domain;
 
 import com.influxdb.annotations.Column;
 import com.influxdb.annotations.Measurement;
+import lombok.Data;
 
 import java.time.Instant;
 
 /**
- * @author fanxinfu
+ * @author zhitan
  */
+@Data
 public class WritePoint {
 
   @Column(tag = true)

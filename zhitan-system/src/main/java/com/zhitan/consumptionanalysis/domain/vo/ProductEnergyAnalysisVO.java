@@ -1,5 +1,6 @@
 package com.zhitan.consumptionanalysis.domain.vo;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,11 +9,9 @@ import java.util.List;
 /**
  * description 产品单耗分析
  *
- * @author hmj
- * @date 2024-10-16 17:55
+ * @author zhitan
  */
-@Getter
-@Setter
+@Data
 public class ProductEnergyAnalysisVO {
     
 

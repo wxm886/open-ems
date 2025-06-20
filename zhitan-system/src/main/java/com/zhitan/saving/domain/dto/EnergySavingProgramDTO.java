@@ -8,8 +8,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * @author Geoffrey
- * @date 2025/01/13
+ * @author zhitan
  */
 @Data
 @ApiModel(value = "节能项目DTO")
@@ -52,6 +51,5 @@ public class EnergySavingProgramDTO {
      * 备注
      */
     private String remark;
-
 
 }

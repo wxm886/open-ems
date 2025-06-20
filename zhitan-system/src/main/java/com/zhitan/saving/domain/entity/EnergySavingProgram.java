@@ -12,8 +12,7 @@ import java.util.Date;
 /**
  * 节能项目管理
  *
- * @author Geoffrey
- * @date 2025/01/13
+ * @author zhitan
  */
 @Data
 @ApiModel(value = "EnergySavingProgram", description = "节能项目管理实体")

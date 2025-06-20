@@ -9,8 +9,7 @@ import java.util.Date;
 /**
  *工序能耗 日
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 @Data
 public class DailyProcessEnergy implements Serializable {

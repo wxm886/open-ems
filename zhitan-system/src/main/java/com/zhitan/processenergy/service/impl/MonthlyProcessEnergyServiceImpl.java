@@ -4,6 +4,8 @@ import com.zhitan.common.enums.TimeType;
 import com.zhitan.processenergy.domain.MonthlyProcessEnergy;
 import com.zhitan.processenergy.mapper.MonthlyProcessEnergyMapper;
 import com.zhitan.processenergy.service.IMonthlyProcessEnergyService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +18,11 @@ import java.util.List;
 /**
  *重点设备能耗统计 日
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class MonthlyProcessEnergyServiceImpl implements IMonthlyProcessEnergyService {
 
     @Resource

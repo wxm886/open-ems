@@ -8,8 +8,6 @@ import java.util.List;
 
 /**
  * @Description 传感器数据
- * @Author zhoubg
- * @date 2024-10-16
  **/
 @Data
 public class SensorParamModel {

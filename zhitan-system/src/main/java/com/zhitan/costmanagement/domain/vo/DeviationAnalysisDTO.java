@@ -14,11 +14,9 @@ import java.util.Date;
 /**
  * 尖峰平谷数据列表实体类 electricityDataItem
  *
- * @author ruoyi
- * @date 2024-06-19
+ * @author zhitan
  */
 @Data
-
 public class DeviationAnalysisDTO {
 
     /**

@@ -2,6 +2,7 @@ package com.zhitan.history.domain.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotBlank;
@@ -11,9 +12,8 @@ import java.util.Date;
 /**
  * 历史监测数据请求 DTO
  *
- * @Author: Zhujw
- * @Date: 2023/3/7
  */
+@Data
 public class HistoricalDataDTO {
 
     /**
@@ -35,29 +35,5 @@ public class HistoricalDataDTO {
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @NotNull(message = "未找到时间信息")
     private Date dataTime;
-
-    public String getIndexId() {
-        return indexId;
-    }
-
-    public void setIndexId(String indexId) {
-        this.indexId = indexId;
-    }
-
-    public String getTimeType() {
-        return timeType;
-    }
-
-    public void setTimeType(String timeType) {
-        this.timeType = timeType;
-    }
-
-    public Date getDataTime() {
-        return dataTime;
-    }
-
-    public void setDataTime(Date dataTime) {
-        this.dataTime = dataTime;
-    }
 
 }

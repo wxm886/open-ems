@@ -8,22 +8,22 @@ import com.zhitan.basicdata.mapper.SysEnergyMapper;
 import com.zhitan.common.core.domain.entity.SysDictData;
 import com.zhitan.common.enums.TimeType;
 import com.zhitan.consumptionanalysis.domain.vo.RankingEnergyData;
-import com.zhitan.dataitem.service.IDataItemService;
+import com.zhitan.energyUsed.service.IEnergyUsedService;
 import com.zhitan.home.domain.vo.HomeEnergyConsumptionTrendVO;
 import com.zhitan.home.domain.vo.HomeEnergyStatisticsVO;
 import com.zhitan.home.domain.vo.HomePeakValleyVO;
 import com.zhitan.home.service.impl.IHomePageService;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.model.domain.ModelNode;
-import com.zhitan.model.domain.vo.ModelNodeIndexInfo;
+import com.zhitan.model.domain.vo.ModelNodePointInfo;
 import com.zhitan.model.mapper.ModelNodeMapper;
-import com.zhitan.model.service.IEnergyIndexService;
+import com.zhitan.model.service.IMeterPointService;
 import com.zhitan.model.service.IModelNodeService;
-import com.zhitan.peakvalley.domain.ElectricityDataItem;
-import com.zhitan.peakvalley.mapper.PeakValleyMapper;
-import com.zhitan.realtimedata.domain.DataItem;
+import com.zhitan.peakvalley.mapper.EnergyUsedElectricityMapper;
+import com.zhitan.realtimedata.domain.EnergyUsed;
 import com.zhitan.system.service.ISysDictDataService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,22 +35,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * description todu
+ * description
  *
- * @author hmj
- * @date 2024-10-31 18:07
+ * @author zhitan
  */
+@Slf4j
 @Service
 @AllArgsConstructor
 public class HomePageServiceImpl implements IHomePageService {
 
-    private final SysEnergyMapper sysEnergyMapper;
+    private SysEnergyMapper sysEnergyMapper;
     private final IModelNodeService modelNodeService;
-    private final IDataItemService dataItemService;
-    private final IEnergyIndexService energyIndexService;
+    private final IEnergyUsedService dataItemService;
+    private final IMeterPointService energyIndexService;
     private final ISysDictDataService sysDictDataService;
     private ModelNodeMapper modelNodeMapper;
-    private PeakValleyMapper electricityDataItemMapper;
+    private EnergyUsedElectricityMapper electricityDataItemMapper;
 
 
     @Override
@@ -131,16 +131,16 @@ public class HomePageServiceImpl implements IHomePageService {
         if (ObjectUtils.isEmpty(modelNode)) {
             return voList;
         }
-        List<ModelNodeIndexInfo> inforList = modelNodeService.getModelNodeIndexIdRelationInforByNodeId(modelNode.getNodeId());
-        List<String> indexIds = inforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
-        // 通过indexIds找data_Item数据
-        List<DataItem> itemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
+        List<ModelNodePointInfo> inforList = modelNodeService.getModelNodeIndexIdRelationInforByNodeId(modelNode.getNodeId());
+        List<String> indexIds = inforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
+        // 通过indexIds找energy_used数据
+        List<EnergyUsed> itemList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
         // 查询点位详细信息
-        List<EnergyIndex> energyIndexInforList = energyIndexService.getEnergyIndexByIds(indexIds);
+        List<MeterPoint> meterPointInforList = energyIndexService.listMeterPointByIds(indexIds);
         // 获取点位能源类型
-        Map<String, List<String>> energyTypeMap = energyIndexInforList.stream()
+        Map<String, List<String>> energyTypeMap = meterPointInforList.stream()
                 .filter(l -> StringUtils.isNotEmpty(l.getEnergyId())).collect(Collectors.groupingBy(
-                        EnergyIndex::getEnergyId, Collectors.mapping(EnergyIndex::getIndexId, Collectors.toList())
+                        MeterPoint::getEnergyId, Collectors.mapping(MeterPoint::getPointId, Collectors.toList())
                 ));
 
         for (HomeEnergyStatisticsVO ratioVO : voList) {
@@ -149,7 +149,7 @@ public class HomePageServiceImpl implements IHomePageService {
                 ratioVO.setCount(0D);
             } else {
                 // 找到合计值
-                double doubleCount = itemList.stream().filter(li -> indexs.contains(li.getIndexId())).mapToDouble(DataItem::getValue).sum();
+                double doubleCount = itemList.stream().filter(li -> indexs.contains(li.getPointId())).mapToDouble(EnergyUsed::getValue).sum();
                 ratioVO.setCount(format2Double(doubleCount));
             }
         }
@@ -201,7 +201,7 @@ public class HomePageServiceImpl implements IHomePageService {
             shixuTimeType = TimeType.MONTH.name();
         }
 
-        Map<String, List<ElectricityDataItem>> electricityDataMap;
+        Map<String, List<com.zhitan.peakvalley.domain.EnergyUsedElectricity>> electricityDataMap;
         // 查询点位信息
         final ModelNode firstModeNodeInfo = modelNodeMapper.getFirstModeNodeInfo(modelcode);
         if (null == firstModeNodeInfo) {
@@ -210,26 +210,26 @@ public class HomePageServiceImpl implements IHomePageService {
 
         double totalElectric;
         // 查询点位信息
-        List<ModelNodeIndexInfo> nodeIndexInfoList = modelNodeMapper.selectIndexByModelCodeAndNodeId(modelcode, firstModeNodeInfo.getNodeId());
+        List<ModelNodePointInfo> nodeIndexInfoList = modelNodeMapper.selectIndexByModelCodeAndNodeId(modelcode, firstModeNodeInfo.getNodeId());
         if (CollectionUtils.isNotEmpty(nodeIndexInfoList)) {
-            Set<String> indexSet = nodeIndexInfoList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toSet());
-            List<ElectricityDataItem> dataItemList = electricityDataItemMapper.getDataStatistics(indexSet, beginTime, endTime, shixuTimeType);
+            Set<String> indexSet = nodeIndexInfoList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toSet());
+            List<com.zhitan.peakvalley.domain.EnergyUsedElectricity> dataItemList = electricityDataItemMapper.getDataStatistics(indexSet, beginTime, endTime, shixuTimeType);
             if (null != dataItemList) {
-                totalElectric = dataItemList.stream().map(ElectricityDataItem::getElectricity).mapToDouble(BigDecimal::doubleValue).sum();
+                totalElectric = dataItemList.stream().map(com.zhitan.peakvalley.domain.EnergyUsedElectricity::getElectricity).mapToDouble(BigDecimal::doubleValue).sum();
             } else {
                 totalElectric = 0;
             }
             electricityDataMap = dataItemList.stream()
-                    .collect(Collectors.groupingBy(ElectricityDataItem::getElectricityType));
+                    .collect(Collectors.groupingBy(com.zhitan.peakvalley.domain.EnergyUsedElectricity::getElectricityType));
         } else {
             totalElectric = 0;
             electricityDataMap = null;
         }
         if (null != electricityDataMap) {
             voList.stream().forEach(vo -> {
-                final List<ElectricityDataItem> electricityDataItems = electricityDataMap.get(vo.getTimeType());
-                if (null != electricityDataItems) {
-                    final double sum = electricityDataItems.stream().map(ElectricityDataItem::getElectricity).mapToDouble(BigDecimal::doubleValue).sum();
+                final List<com.zhitan.peakvalley.domain.EnergyUsedElectricity> energyUsedElectricities = electricityDataMap.get(vo.getTimeType());
+                if (null != energyUsedElectricities) {
+                    final double sum = energyUsedElectricities.stream().map(com.zhitan.peakvalley.domain.EnergyUsedElectricity::getElectricity).mapToDouble(BigDecimal::doubleValue).sum();
                     vo.setCount(format2Double(sum));
                     if (totalElectric != 0) {
                         vo.setPercentage(format2Double(sum / totalElectric * 100));
@@ -247,12 +247,8 @@ public class HomePageServiceImpl implements IHomePageService {
         List<String> xdataList = new ArrayList<>();
         // 查询所有能源类型
         List<SysEnergy> sysEnergies = sysEnergyMapper.selectSysEnergyList(new SysEnergy());
-        final Map<String, Object> energyCollectMap = sysEnergies.stream().collect(Collectors.toMap(SysEnergy::getEnersno, SysEnergy::getCoefficient));
-        final Map<String, String> energyNameMap = sysEnergies.stream().collect(Collectors.toMap(SysEnergy::getEnersno, SysEnergy::getEnername));
-
 
         Date queryTime = new Date();
-//        Date queryTime = DateUtil.parseDateTime("2023-03-28 00:00:00");
         Date beginTime;
         Date endTime;
         String shixuTimeType;
@@ -282,34 +278,42 @@ public class HomePageServiceImpl implements IHomePageService {
         if (ObjectUtils.isEmpty(modelNode)) {
             return vo;
         }
-        List<ModelNodeIndexInfo> inforList = modelNodeService.getModelNodeIndexIdRelationInforByNodeId(modelNode.getNodeId());
-        List<String> indexIds = inforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
-        // 通过indexIds找data_Item数据
-        List<DataItem> itemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
-        final Map<String, List<DataItem>> dataItemMap = itemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        List<ModelNodePointInfo> inforList = modelNodeService.getModelNodeIndexIdRelationInforByNodeId(modelNode.getNodeId());
+        List<String> indexIds = inforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
+        // 通过indexIds找energy_used数据
+        List<EnergyUsed> itemList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
+        final Map<String, List<EnergyUsed>> dataItemMap = itemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
         // 查询点位详细信息
-        List<EnergyIndex> energyIndexInforList = energyIndexService.getEnergyIndexByIds(indexIds);
+        List<MeterPoint> meterPointInforList = energyIndexService.listMeterPointByIds(indexIds);
         // 获取点位能源类型
-        Map<String, List<String>> energyTypeMap = energyIndexInforList.stream()
+        Map<String, List<String>> energyTypeMap = meterPointInforList.stream()
                 .filter(l -> StringUtils.isNotEmpty(l.getEnergyId())).collect(Collectors.groupingBy(
-                        EnergyIndex::getEnergyId, Collectors.mapping(EnergyIndex::getIndexId, Collectors.toList())
+                        MeterPoint::getEnergyId, Collectors.mapping(MeterPoint::getPointId, Collectors.toList())
                 ));
+
+        List<String> lengList = new ArrayList<>();
+
         while (!beginTime.after(endTime)) {
             final String currentTime = DateUtil.format(beginTime, timeFormat);
             xdataList.add(currentTime);
-            final List<DataItem> dataItems = dataItemMap.get(currentTime);
+            final List<EnergyUsed> energyUseds = dataItemMap.get(currentTime);
             List<Double> energyCount = new ArrayList<>();
-            energyTypeMap.forEach((energyType, IndexIdList) -> {
+
+            sysEnergies.forEach(x -> {
+                if(!lengList.contains(x.getEnername())){
+                    lengList.add(x.getEnername());
+                }
+                List<String> indexIdList = energyTypeMap.get(x.getEnersno());
                 double sum;
-                if (null == dataItems) {
+                if (null == energyUseds || CollectionUtils.isEmpty(indexIdList)) {
                     sum = 0;
                 } else {
-                    sum = dataItems.stream().filter(li -> IndexIdList.contains(li.getIndexId())).mapToDouble(DataItem::getValue).sum();
+                    sum = energyUseds.stream().filter(li -> indexIdList.contains(li.getPointId())).mapToDouble(EnergyUsed::getValue).sum();
                 }
-                final BigDecimal coefficient = (BigDecimal) energyCollectMap.get(energyType);
-                energyCount.add(sum * coefficient.doubleValue());
+                energyCount.add(sum * x.getCoefficient().doubleValue());
             });
             ydataList.add(energyCount);
+
             switch (TimeType.valueOf(timeType)) {
                 case DAY:
                     beginTime = DateUtil.offsetHour(beginTime, 1);
@@ -324,11 +328,6 @@ public class HomePageServiceImpl implements IHomePageService {
         }
         vo.setXdata(xdataList.toArray(new String[0]));
         Double[][] array = new Double[sysEnergies.size()][xdataList.size()];
-        List<String> lengList = new ArrayList<>();
-        energyCollectMap.keySet().forEach(key -> {
-            final String name = energyNameMap.get(key);
-            lengList.add(name);
-        });
 
         for (int i = 0; i < ydataList.size(); i++) {
             final List<Double> doubleList = ydataList.get(i);
@@ -378,7 +377,7 @@ public class HomePageServiceImpl implements IHomePageService {
         if (ObjectUtils.isEmpty(parentNode)) {
             return energyDataList;
         }
-        List<String> nodeIds = modelNodeList.stream().filter(x -> ObjectUtils.isNotEmpty(x.getParentId()))
+        List<String> nodeIds = modelNodeList.stream().filter(x -> ObjectUtils.isNotEmpty(x.getParentId()) && parentNode.getNodeId().equals(x.getParentId()))
                 .map(ModelNode::getNodeId).collect(Collectors.toList());
         if (ObjectUtils.isEmpty(nodeIds)) {
             return energyDataList;

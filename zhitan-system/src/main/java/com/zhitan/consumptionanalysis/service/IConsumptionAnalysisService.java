@@ -11,8 +11,7 @@ import java.util.List;
 /**
  * description 能耗对比分析
  *
- * @author hmj
- * @date 2024-10-16 17:54
+ * @author zhitan
  */
 public interface IConsumptionAnalysisService {
     ConsumptionAnalysisVO getByArea(ConsumptionAnalysisDTO dto);

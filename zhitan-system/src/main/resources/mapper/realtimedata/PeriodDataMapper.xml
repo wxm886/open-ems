@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.realtimedata.mapper.PeriodDataMapper">
-  <resultMap id="dataItemMap" type="com.zhitan.realtimedata.domain.DataItem">
-    <id column="index_id" property="indexId"/>
+  <resultMap id="dataItemMap" type="com.zhitan.realtimedata.domain.EnergyUsed">
+    <id column="point_id" property="pointId"/>
     <id column="time_code" property="timeCode"/>
-    <id column="index_code" property="indexCode"/>
-    <id column="index_name" property="indexName"/>
+    <id column="point_code" property="pointCode"/>
+    <id column="point_name" property="pointName"/>
     <result column="begin_time" property="beginTime"/>
     <result column="end_time" property="endTime"/>
     <result column="data_time" property="dataTime"/>
@@ -30,15 +30,15 @@
   </resultMap>
   <delete id="delete">
     DELETE
-    FROM data_item
-    WHERE index_id = #{indexId}
+    FROM energy_used
+    WHERE point_id = #{indexId}
       AND time_type = #{timeType}
       AND data_time &gt;= #{beginTime}
       AND data_time &lt;= #{endTime}
   </delete>
 
   <sql id="itemHead">
-    SELECT di.index_id,
+    SELECT di.point_id,
            di.time_code,
            di.time_type,
            di.begin_time,
@@ -50,25 +50,25 @@
            di.update_time,
            ci.code AS "index_code",
            ci.name AS "index_name"
-    FROM data_item di
-           LEFT JOIN energy_index ci ON di.index_id = ci.index_id
+    FROM energy_used di
+           LEFT JOIN meter_point ci ON di.point_id = ci.point_id
   </sql>
 
   <select id="getDataByIndex" resultMap="dataItemMap">
     <include refid="itemHead"/>
-    WHERE di.index_id = #{indexId}
+    WHERE di.point_id = #{indexId}
     AND di.time_code = #{timeCode}
   </select>
   <select id="hasExist" resultType="java.lang.String">
-    SELECT index_id
-    FROM data_item
-    WHERE index_id = #{indexId}
+    SELECT point_id
+    FROM energy_used
+    WHERE point_id = #{indexId}
       AND time_code = #{timeCode}
   </select>
   <select id="getDatasByIndex" resultMap="dataItemMap">
     <include refid="itemHead"/>
     where di.time_code = #{timeCode}
-    AND di.index_id in
+    AND di.point_id in
     <foreach item="indexId" index="index" collection="indexIds"
       open="(" separator="," close=")">
       #{indexId}
@@ -76,7 +76,7 @@
   </select>
   <select id="getPeriodDatasByIndex" resultMap="dataItemMap">
     <include refid="itemHead"/>
-    WHERE di.index_id in
+    WHERE di.point_id in
     <foreach item="indexId" index="index" collection="indexIds"
       open="(" separator="," close=")">
       #{indexId}
@@ -99,8 +99,8 @@
     <if test="statisticType.name() == 'Average'">
       avg(value)
     </if>
-    FROM data_item
-    WHERE index_id = #{indexId}
+    FROM energy_used
+    WHERE point_id = #{indexId}
     AND time_type = #{timeType}
     AND data_time &gt;= #{beginTime}
     AND data_time &lt; #{endTime}
@@ -124,10 +124,10 @@
     i.code as index_code,
     i.name as index_name,
     i.unit_id,
-    d.index_id
-    FROM data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
-    WHERE d.index_id in
+    d.point_id
+    FROM energy_point d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
+    WHERE d.point_id in
     <foreach item="indexId" index="index" collection="indexIds"
       open="(" separator="," close=")">
       #{indexId}
@@ -156,9 +156,9 @@
     i.code as index_code,
     i.name as index_name,
     i.unit_id,
-    d.index_id
-    FROM data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
+    d.point_id index_id
+    FROM energy_point d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
     WHERE
     i.code IN
     <foreach item="indexCode" index="index" collection="indexCodes"
@@ -168,7 +168,7 @@
     AND time_type = #{timeType}
     AND data_time &gt;= #{beginTime}
     AND data_time &lt; #{endTime}
-    GROUP BY d.index_id, i.code, i.unit_id, i.name
+    GROUP BY d.point_id, i.code, i.unit_id, i.name
   </select>
 
   <select id="dataStatisticsFilterByCodes" resultMap="dataItemMap">
@@ -189,9 +189,9 @@
     i.code as index_code,
     i.name as index_name,
     i.unit_id,
-    d.index_id
-    FROM data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
+    d.point_id
+    FROM energy_used d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
     WHERE
     i.code IN
     <foreach item="indexCode" index="index" collection="indexCodes"
@@ -204,12 +204,12 @@
     <if test="isFilter == true">
       AND value > 0
     </if>
-    GROUP BY d.index_id, i.code, i.unit_id, i.name
+    GROUP BY d.point_id, i.code, i.unit_id, i.name
   </select>
 
   <select id="statistic" resultMap="dataItemMap">
     SELECT
-    d.index_id,
+    d.point_id,
     time_code,
     data_time,
     i.code as index_code,
@@ -217,10 +217,10 @@
     i.unit_id,
     VALUE
     FROM
-    data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
+    energy_used d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
     WHERE
-    d.index_id in
+    d.point_id in
     <foreach item="indexId" index="index" collection="indexIds"
       open="(" separator="," close=")">
       #{indexId}
@@ -229,12 +229,12 @@
     AND data_time &lt; #{endTime}
     AND time_type = #{timeType}
     GROUP BY
-    d.index_id, time_code, data_time, value, i.code, i.unit_id, i.name
+    d.point_id, time_code, data_time, value, i.code, i.unit_id, i.name
   </select>
 
   <select id="statisticByCode" resultMap="dataItemMap">
     SELECT
-    d.index_id,
+    d.point_id,
     time_code,
     data_time,
     i.code as index_code,
@@ -242,8 +242,8 @@
     i.unit_id,
     value
     FROM
-    data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
+    energy_used d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
     WHERE
     i.code IN
     <foreach item="indexCode" index="index" collection="indexCodes"
@@ -254,12 +254,12 @@
     AND data_time &lt;= #{endTime}
     AND time_type = #{timeType}
     GROUP BY
-    d.index_id, time_code, data_time, value, i.code, i.unit_id, i.name
+    d.point_id, time_code, data_time, value, i.code, i.unit_id, i.name
   </select>
 
   <select id="getStatisticDatasById" resultMap="statisticResultMap">
     SELECT
-    d.index_id,
+    d.point_id,
     i.code as index_code,
     i.unit_id,
     i.name as index_name,
@@ -267,22 +267,22 @@
     min(value) as minvalue,
     avg(value) as avgvalue
     FROM
-    data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
+    energy_used d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
     WHERE
-    d.index_id in
+    d.point_id in
     <foreach item="indexId" index="index" collection="indexIds"
       open="(" separator="," close=")">
       #{indexId}
     </foreach>
     AND time_type = #{timeType}
     GROUP BY
-    d.index_id, i.code, i.unit_id, i.name
+    d.point_id, i.code, i.unit_id, i.name
   </select>
 
   <select id="getStatisticDatasByCode" resultMap="statisticResultMap">
     SELECT
-    d.index_id,
+    d.point_id,
     i.code as index_code,
     i.name as index_name,
     i.unit_id,
@@ -290,8 +290,8 @@
     min(value) as minvalue,
     avg(value) as avgvalue
     FROM
-    data_item d
-    LEFT JOIN energy_index i ON d.index_id = i.index_id
+    energy_used d
+    LEFT JOIN meter_point i ON d.point_id = i.point_id
     WHERE
     i.code IN
     <foreach item="indexCode" index="index" collection="indexCodes"
@@ -300,11 +300,11 @@
     </foreach>
     AND time_type = #{timeType}
     GROUP BY
-    d.index_id, i.code, i.unit_id, i.name
+    d.point_id, i.code, i.unit_id, i.name
   </select>
 
   <insert id="insert">
-    INSERT INTO data_item (index_id,
+    INSERT INTO energy_used (point_id,
                            time_code,
                            time_type,
                            begin_time,
@@ -313,19 +313,19 @@
                            value,
                            quality,
                            create_time)
-    VALUES (#{dataItem.indexId},
-            #{dataItem.timeCode},
-            #{dataItem.timeType},
-            #{dataItem.beginTime},
-            #{dataItem.endTime},
-            #{dataItem.dataTime},
-            #{dataItem.value, jdbcType = DOUBLE},
-            #{dataItem.quality},
+    VALUES (#{energyUsed.pointId},
+            #{energyUsed.timeCode},
+            #{energyUsed.timeType},
+            #{energyUsed.beginTime},
+            #{energyUsed.endTime},
+            #{energyUsed.dataTime},
+            #{energyUsed.value, jdbcType = DOUBLE},
+            #{energyUsed.quality},
             now())
   </insert>
 
   <insert id="save">
-    insert into data_item (index_id,
+    insert into energy_used (point_id,
                            time_code,
                            time_type,
                            begin_time,
@@ -334,27 +334,27 @@
                            value,
                            quality,
                            create_time)
-    select #{dataItem.indexId},
-           #{dataItem.timeCode},
-           #{dataItem.timeType},
-           #{dataItem.beginTime},
-           #{dataItem.endTime},
-           #{dataItem.dataTime},
-           #{dataItem.value, jdbcType = DOUBLE},
-           #{dataItem.quality},
+    select #{energyUsed.pointId},
+           #{energyUsed.timeCode},
+           #{energyUsed.timeType},
+           #{energyUsed.beginTime},
+           #{energyUsed.endTime},
+           #{energyUsed.dataTime},
+           #{energyUsed.value, jdbcType = DOUBLE},
+           #{energyUsed.quality},
            now()
     on conflict
-      (index_id,time_code)
+      (point_id,time_code)
     do update
-    set value = #{dataItem.value, jdbcType = DOUBLE},
-      quality = #{dataItem.quality},
+    set value = #{energyUsed.value, jdbcType = DOUBLE},
+      quality = #{energyUsed.quality},
       update_time = now();
 
   </insert>
   <insert id="saveDataList" parameterType="java.util.List">
-    <foreach item="dataItem" collection="dataItemVlues">
-      <if test="dataItem != null">
-        insert into data_item (index_id,
+    <foreach item="energyUsed" collection="dataItemVlues">
+      <if test="energyUsed != null">
+        insert into energy_used (point_id,
         time_code,
         time_type,
         begin_time,
@@ -363,25 +363,25 @@
         value,
         quality,
         create_time)
-        select #{dataItem.indexId},
-        #{dataItem.timeCode},
-        #{dataItem.timeType},
-        #{dataItem.beginTime},
-        #{dataItem.endTime},
-        #{dataItem.dataTime},
-        #{dataItem.value, jdbcType = DOUBLE},
-        #{dataItem.quality},
+        select #{energyUsed.pointId},
+        #{energyUsed.timeCode},
+        #{energyUsed.timeType},
+        #{energyUsed.beginTime},
+        #{energyUsed.endTime},
+        #{energyUsed.dataTime},
+        #{energyUsed.value, jdbcType = DOUBLE},
+        #{energyUsed.quality},
         now()
         on conflict(index_id,time_code)
         do update
-        set value= #{dataItem.value, jdbcType = DOUBLE},
-        quality = #{dataItem.quality},
+        set value= #{energyUsed.value, jdbcType = DOUBLE},
+        quality = #{energyUsed.quality},
         update_time = now();
       </if>
     </foreach>
   </insert>
   <insert id="insertDataList">
-    insert into data_item (index_id, time_code,
+    insert into energy_used (point_id, time_code,
     time_type,
     begin_time,
     end_time,
@@ -390,20 +390,20 @@
     quality,
     create_time)
     values
-    <foreach collection="list" item="dataItem" index="index" separator=",">
-      (#{dataItem.indexId},
-        #{dataItem.timeCode},
-        #{dataItem.timeType},
-        #{dataItem.beginTime},
-        #{dataItem.endTime},
-        #{dataItem.dataTime},
-        #{dataItem.value, jdbcType = DOUBLE},
-        #{dataItem.quality},
+    <foreach collection="list" item="energyUsed" index="index" separator=",">
+      (#{energyUsed.pointId},
+        #{energyUsed.timeCode},
+        #{energyUsed.timeType},
+        #{energyUsed.beginTime},
+        #{energyUsed.endTime},
+        #{energyUsed.dataTime},
+        #{energyUsed.value, jdbcType = DOUBLE},
+        #{energyUsed.quality},
         now())
     </foreach>
   </insert>
     <insert id="insertTOUData">
-        insert into electricity_data_item (index_id, time_code,
+        insert into energy_used_electricity (index_id, time_code,
                                            electricity_type,
                                            index_code,
                                            data_time,
@@ -414,23 +414,23 @@
                                            price,
                                            create_time,
                                            time_type)
-        values (#{dataItem.indexId},
-                #{dataItem.timeCode},
-                #{dataItem.electricityType},
-                #{dataItem.indexCode},
-                #{dataItem.dataTime},
-                #{dataItem.beginTime},
-                #{dataItem.endTime},
-                #{dataItem.electricity, jdbcType = DOUBLE},
-                #{dataItem.cost, jdbcType = DOUBLE},
-                #{dataItem.price, jdbcType = DOUBLE},
+        values (#{energyUsed.indexId},
+                #{energyUsed.timeCode},
+                #{energyUsed.electricityType},
+                #{energyUsed.indexCode},
+                #{energyUsed.dataTime},
+                #{energyUsed.beginTime},
+                #{energyUsed.endTime},
+                #{energyUsed.electricity, jdbcType = DOUBLE},
+                #{energyUsed.cost, jdbcType = DOUBLE},
+                #{energyUsed.price, jdbcType = DOUBLE},
                 now(),
-                #{dataItem.timeType})
+                #{energyUsed.timeType})
           ON CONFLICT (index_id, time_code,electricity_type)
             DO UPDATE SET electricity = EXCLUDED.electricity,cost = EXCLUDED.cost,price = EXCLUDED.price;
     </insert>
   <insert id="insertTOUDataItems">
-      insert into electricity_data_item (index_id, time_code,
+      insert into energy_used_electricity (index_id, time_code,
       electricity_type,
       index_code,
       data_time,
@@ -442,37 +442,37 @@
       create_time,
       time_type)
       values
-      <foreach collection="dataItems" item="dataItem" index="index" separator=",">
-          values (#{dataItem.indexId},
-          #{dataItem.timeCode},
-          #{dataItem.electricityType},
-          #{dataItem.indexCode},
-          #{dataItem.dataTime},
-          #{dataItem.beginTime},
-          #{dataItem.endTime},
-          #{dataItem.electricity, jdbcType = DOUBLE},
-          #{dataItem.cost, jdbcType = DOUBLE},
-          #{dataItem.price, jdbcType = DOUBLE},
+      <foreach collection="energyUseds" item="energyUsed" index="index" separator=",">
+          values (#{energyUsed.indexId},
+          #{energyUsed.timeCode},
+          #{energyUsed.electricityType},
+          #{energyUsed.indexCode},
+          #{energyUsed.dataTime},
+          #{energyUsed.beginTime},
+          #{energyUsed.endTime},
+          #{energyUsed.electricity, jdbcType = DOUBLE},
+          #{energyUsed.cost, jdbcType = DOUBLE},
+          #{energyUsed.price, jdbcType = DOUBLE},
           now(),
-          #{dataItem.timeType})
+          #{energyUsed.timeType})
       </foreach>
       ON CONFLICT (index_id, time_code,electricity_type)
       DO UPDATE SET electricity = EXCLUDED.electricity,cost = EXCLUDED.cost,price = EXCLUDED.price;
   </insert>
 
   <update id="update">
-    UPDATE data_item
-    SET value       = #{dataItem.value, jdbcType = DOUBLE},
-        quality     = #{dataItem.quality},
+    UPDATE energy_used
+    SET value       = #{energyUsed.value, jdbcType = DOUBLE},
+        quality     = #{energyUsed.quality},
         update_time = now()
-    WHERE index_id = #{dataItem.indexId}
-      AND time_code = #{dataItem.timeCode}
+    WHERE point_id = #{energyUsed.pointId}
+      AND time_code = #{energyUsed.timeCode}
   </update>
   <select id="getPeriodDatasByIndexAndQuality" resultMap="dataItemMap">
-    SELECT index_id, time_code, time_type, begin_time, end_time, data_time, `value`, quality,
+    SELECT point_id, time_code, time_type, begin_time, end_time, data_time, `value`, quality,
     create_time, update_time
-    FROM data_item
-    WHERE index_id in
+    FROM energy_used
+    WHERE point_id in
     <foreach item="indexId" index="index" collection="indexIds"
       open="(" separator="," close=")">
       #{indexId}
@@ -488,10 +488,10 @@
     AND di.time_code = #{timeCode}
   </select>
   <select id="queryDataItemIsExist" resultType="java.lang.String">
-    select concat(time_code, ':', index_id)
-    from data_item where
+    select concat(time_code, ':', point_id)
+    from energy_used where
     <foreach collection="queryMap.keys" index="index" item="key" separator="or">
-      (time_code = #{key} and index_id in
+      (time_code = #{key} and point_id in
       <foreach collection="queryMap[key]" item="id" separator="," open="(" close=")">
         #{id}
       </foreach>

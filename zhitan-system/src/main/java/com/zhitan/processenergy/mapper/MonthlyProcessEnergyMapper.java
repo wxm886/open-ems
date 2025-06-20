@@ -9,7 +9,7 @@ import java.util.List;
 /**
  *工序能耗 日
  *
- * @author sys
+ * @author zhitan
  */
 public interface MonthlyProcessEnergyMapper {
 

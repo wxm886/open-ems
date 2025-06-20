@@ -9,6 +9,8 @@ import com.zhitan.common.enums.BusinessType;
 import com.zhitan.common.utils.poi.ExcelUtil;
 import com.zhitan.energyIndicators.domain.EnergyIndicators;
 import com.zhitan.energyIndicators.service.IEnergyIndicatorsService;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +20,14 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 能源指标Controller
+ * 能源指标录入
  *
- * @author ZhiTan
- * @date 2024-10-25
+ * @author zhitan
  */
 @RestController
+@AllArgsConstructor
+@Api(tags = "能源指标录入")
+@RequestMapping("/energyIndicators")
 public class EnergyIndicatorsController extends BaseController
 {
     @Resource
@@ -33,7 +37,7 @@ public class EnergyIndicatorsController extends BaseController
      * 查询能源指标列表
      */
     @PreAuthorize("@ss.hasPermi('system:energyIndicators:list')")
-    @GetMapping("/energyIndicators/list")
+    @GetMapping("/list")
     public TableDataInfo energyIndicatorsPage(EnergyIndicators energyIndicators, @RequestParam Long pageNum, @RequestParam Long pageSize)
     {
 //        startPage();
@@ -47,11 +51,11 @@ public class EnergyIndicatorsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:energyIndicators:export')")
     @Log(title = "能源指标", businessType = BusinessType.EXPORT)
-    @PostMapping("/energyIndicators/export")
+    @PostMapping("/export")
     public void export(HttpServletResponse response, EnergyIndicators energyIndicators)
     {
         List<EnergyIndicators> list = energyIndicatorsService.selectEnergyIndicatorsList(energyIndicators);
-        ExcelUtil<EnergyIndicators> util = new ExcelUtil<EnergyIndicators>(EnergyIndicators.class);
+        ExcelUtil<EnergyIndicators> util = new ExcelUtil<>(EnergyIndicators.class);
         util.exportExcel(response, list, "能源指标数据");
     }
 
@@ -59,7 +63,7 @@ public class EnergyIndicatorsController extends BaseController
      * 获取能源指标详细信息
      */
     @PreAuthorize("@ss.hasPermi('system:energyIndicators:query')")
-    @GetMapping(value = "/energyIndicators/{energyIndicatorsId}")
+    @GetMapping(value = "/{energyIndicatorsId}")
     public AjaxResult getInfo(@PathVariable("energyIndicatorsId") String energyIndicatorsId)
     {
         return success(energyIndicatorsService.selectEnergyIndicatorsByNodeId(energyIndicatorsId));
@@ -70,7 +74,7 @@ public class EnergyIndicatorsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:energyIndicators:add')")
     @Log(title = "能源指标", businessType = BusinessType.INSERT)
-    @PostMapping(value = "/energyIndicators")
+    @PostMapping
     public AjaxResult add(@RequestBody EnergyIndicators energyIndicators)
     {
 
@@ -98,7 +102,7 @@ public class EnergyIndicatorsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:energyIndicators:edit')")
     @Log(title = "能源指标", businessType = BusinessType.UPDATE)
-    @PutMapping(value = "/energyIndicators")
+    @PutMapping
     public AjaxResult edit(@RequestBody EnergyIndicators energyIndicators)
     {
         return toAjax(energyIndicatorsService.updateEnergyIndicators(energyIndicators));
@@ -109,7 +113,7 @@ public class EnergyIndicatorsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:energyIndicators:remove')")
     @Log(title = "能源指标", businessType = BusinessType.DELETE)
-	@DeleteMapping("/energyIndicators/{energyIndicatorsIds}")
+	@DeleteMapping("/{energyIndicatorsIds}")
     public AjaxResult remove(@PathVariable String[] energyIndicatorsIds)
     {
         return toAjax(energyIndicatorsService.deleteEnergyIndicatorsByEnergyIndicatorsIds(energyIndicatorsIds));

@@ -11,6 +11,8 @@ import com.zhitan.statisticalAnalysis.domain.vo.DataAnalysisYoYVO;
 import com.zhitan.statisticalAnalysis.service.IStatisticalAnalysisService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,10 @@ import java.util.List;
 /**
  * 统计分析 控制层
  */
-@Api(tags = "统计分析")
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "统计分析")
 @RequestMapping("/statisticalAnalysis")
 public class StatisticalAnalysisController extends BaseController {
 

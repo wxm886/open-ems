@@ -5,11 +5,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/**
- * @Description
- * @Author zhoubg
- * @date 2024-10-18
- **/
 @Data
 public class RealTimeHistoryDataVO {
 

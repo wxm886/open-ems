@@ -3,28 +3,30 @@ package com.zhitan.web.controller.powerDistribution;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.basicdata.domain.MeterImplement;
-import com.zhitan.basicdata.services.IMeterImplementService;
+import com.zhitan.meter.domain.Meter;
+import com.zhitan.meter.services.IMeterService;
 import com.zhitan.common.core.controller.BaseController;
 import com.zhitan.common.core.domain.AjaxResult;
 import com.zhitan.powerDistribution.domain.PowerDistribution;
 import com.zhitan.powerDistribution.services.IPowerDistributionService;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "配电室管理")
 @RequestMapping("/powerDistribution")
 public class PowerDistributionController extends BaseController {
 
-    @Resource
     private IPowerDistributionService powerDistributionService;
-
-    @Resource
-    private IMeterImplementService meterImplementService;
+    private IMeterService meterImplementService;
 
     /**
      * 配电室列表
@@ -108,7 +110,7 @@ public class PowerDistributionController extends BaseController {
         List<String> idList = new ArrayList<>();
         List<String> errorList = new ArrayList<>();
         for (String id : ids) {
-            List<MeterImplement> meterList = meterImplementService.listMeterImplByInstallLocation(id);
+            List<Meter> meterList = meterImplementService.listMeterImplByInstallLocation(id);
             if (CollectionUtils.isEmpty(meterList)) {
                 idList.add(id);
             } else {

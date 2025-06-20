@@ -9,8 +9,7 @@ import java.util.Map;
 /**
  * 碳排放核算
  *
- * @author lsk
- * @date 2024-10-29
+ * @author zhitan
  */
 public interface ICarbonEmissionService {
 

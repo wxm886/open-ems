@@ -20,11 +20,4 @@ public class EquipmentMeasuringPointParameters {
 
     private String meteName;
 
-    public String getyValue() {
-        return yValue;
-    }
-
-    public void setyValue(String yValue) {
-        this.yValue = yValue;
-    }
 }

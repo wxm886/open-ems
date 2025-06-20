@@ -1,8 +1,6 @@
 package com.zhitan.energyMonitor.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.zhitan.basicdata.domain.MeterImplement;
-import com.zhitan.basicdata.mapper.MeterImplementMapper;
 import com.zhitan.common.constant.CommonConst;
 import com.zhitan.common.constant.TimeTypeConst;
 import com.zhitan.common.enums.CollectionModes;
@@ -16,37 +14,32 @@ import com.zhitan.energyMonitor.domain.vo.ListElectricLoadItem;
 import com.zhitan.energyMonitor.domain.vo.ListElectricLoadVO;
 import com.zhitan.energyMonitor.domain.vo.ListElectricityMeterVO;
 import com.zhitan.energyMonitor.service.IElectricLoadService;
-import com.zhitan.knowledgeBase.domain.enums.EnergyTypeEnum;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.meter.domain.Meter;
+import com.zhitan.meter.mapper.MeterImplementMapper;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.realtimedata.domain.TagValue;
 import com.zhitan.realtimedata.service.RealtimeDatabaseService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description: sensor_alarm_item
- * @Author: jeecg-boot
- * @Date: 2022-04-19
- * @Version: V1.0
- */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class ElectricLoadServiceImpl implements IElectricLoadService {
-    @Autowired
     private RealtimeDatabaseService realtimeDatabaseService;
-    @Resource
     private MeterImplementMapper meterImplementMapper;
 
     @Override
-    public ListElectricLoadVO list(String timeType, String timeCode, EnergyIndex energyIndex, String meterId) {
+    public ListElectricLoadVO list(String timeType, String timeCode, MeterPoint meterPoint, String meterId) {
         ListElectricLoadVO vo = new ListElectricLoadVO();
         List<ListElectricLoadItem> itemList = new ArrayList<>();
         vo.setItemList(itemList);
@@ -59,24 +52,24 @@ public class ElectricLoadServiceImpl implements IElectricLoadService {
         detail.setRate(CommonConst.DOUBLE_MINUS_SIGN);
         vo.setDetail(detail);
 
-        MeterImplement meterImplement = meterImplementMapper.selectById(meterId);
+        Meter meter = meterImplementMapper.selectById(meterId);
 
-        if (ObjectUtil.isEmpty(meterImplement)) {
+        if (ObjectUtil.isEmpty(meter)) {
             return vo;
         }
         List<Date> dateList = new ArrayList<>();
         ChartUtils.generateDateList(timeType, timeCode, dateList);
         // 因为influxdb没有按照月分组取数据，只能按照日期循环取数据
         if (TimeTypeConst.TIME_TYPE_YEAR.equals(timeType)) {
-            getYearData(timeType, dateList, energyIndex, meterImplement.getMeterName(), itemList);
+            getYearData(timeType, dateList, meterPoint, meter.getMeterName(), itemList);
         } else {
-            getDayAndMonthData(timeType, timeCode, energyIndex, meterImplement.getMeterName(), itemList);
+            getDayAndMonthData(timeType, timeCode, meterPoint, meter.getMeterName(), itemList);
         }
-        if (!StringUtil.isEmptyOrNull(energyIndex.getCode())) {
+        if (!StringUtil.isEmptyOrNull(meterPoint.getCode())) {
             Date start = ChartUtils.getDateTime(timeType, timeCode);
             Date end = ChartUtils.getEndTime(timeType, start);
 
-            String code = energyIndex.getCode();
+            String code = meterPoint.getCode();
             TagValue maxTagValueModel = realtimeDatabaseService.statistics(code, start, end, CollectionModes.max);
             TagValue minTagValueModel = realtimeDatabaseService.statistics(code, start, end, CollectionModes.min);
             TagValue avgTagValueModel = realtimeDatabaseService.statistics(code, start, end, CollectionModes.mean);
@@ -121,8 +114,8 @@ public class ElectricLoadServiceImpl implements IElectricLoadService {
     /**
      * 获取月和天数据,因为influxdb可以按照分。时。天分组取数，不可以按照月分组取数，所以分成两个方法来写
      */
-    private void getDayAndMonthData(String timeType, String timeCode, EnergyIndex energyIndex, String meterName, List<ListElectricLoadItem> itemList) {
-        String tagCodes = energyIndex.getCode();
+    private void getDayAndMonthData(String timeType, String timeCode, MeterPoint meterPoint, String meterName, List<ListElectricLoadItem> itemList) {
+        String tagCodes = meterPoint.getCode();
         List<TagValue> maxList = new ArrayList<>();
         List<TagValue> minList = new ArrayList<>();
         List<TagValue> avgList = new ArrayList<>();
@@ -182,8 +175,8 @@ public class ElectricLoadServiceImpl implements IElectricLoadService {
             if (TimeTypeConst.TIME_TYPE_DAY.equals(timeType)) {
                 // 由于实时库返回的时间对应值代表的是前一个周期的值
                 Date nextHour = DateTimeUtil.addHours(date, CommonConst.DIGIT_1);
-                if (!StringUtil.isEmptyOrNull(energyIndex.getCode())) {
-                    TagValue tagValue = realtimeDatabaseService.retrieve(energyIndex.getCode(), nextHour);
+                if (!StringUtil.isEmptyOrNull(meterPoint.getCode())) {
+                    TagValue tagValue = realtimeDatabaseService.retrieve(meterPoint.getCode(), nextHour);
                     if (!ObjectUtil.isEmpty(tagValue)) {
                         if (ObjectUtils.isEmpty(tagValue) || ObjectUtils.isEmpty(tagValue.getValue())) {
                             temp.setValue(CommonConst.DOUBLE_MINUS_SIGN);
@@ -221,8 +214,8 @@ public class ElectricLoadServiceImpl implements IElectricLoadService {
     /**
      * 获取年数据
      */
-    private void getYearData(String timeType, List<Date> dateList, EnergyIndex energyIndex, String meterName, List<ListElectricLoadItem> itemList) {
-        String tagCode = StringUtil.ifEmptyOrNullReturnValue(energyIndex.getCode());
+    private void getYearData(String timeType, List<Date> dateList, MeterPoint meterPoint, String meterName, List<ListElectricLoadItem> itemList) {
+        String tagCode = StringUtil.ifEmptyOrNullReturnValue(meterPoint.getCode());
         for (Date date : dateList) {
             ListElectricLoadItem temp = new ListElectricLoadItem();
             Date endTime = DateTimeUtil.addMonths(date, CommonConst.DIGIT_1);
@@ -230,7 +223,7 @@ public class ElectricLoadServiceImpl implements IElectricLoadService {
             temp.setMax(CommonConst.DOUBLE_MINUS_SIGN);
             temp.setMin(CommonConst.DOUBLE_MINUS_SIGN);
             if (!StringUtil.isEmptyOrNull(tagCode)) {
-                String code = energyIndex.getCode();
+                String code = meterPoint.getCode();
                 TagValue rt3 = realtimeDatabaseService.statistics(code, date, endTime, CollectionModes.max);
                 TagValue rt4 = realtimeDatabaseService.statistics(code, date, endTime, CollectionModes.min);
                 TagValue rt2 = realtimeDatabaseService.statistics(code, date, endTime, CollectionModes.mean);
@@ -264,13 +257,13 @@ public class ElectricLoadServiceImpl implements IElectricLoadService {
      */
     @Override
     public List<ListElectricityMeterVO> listElectricMeter(String nodeId) {
-        List<MeterImplement> meterImplements = meterImplementMapper.selectByNodeId(nodeId);
-        meterImplements = meterImplements.stream().filter(x -> "electric".equals(x.getEnergyType())).collect(Collectors.toList());
+        List<Meter> meters = meterImplementMapper.selectByNodeId(nodeId);
+        meters = meters.stream().filter(x -> "electric".equals(x.getEnergyType())).collect(Collectors.toList());
         List<ListElectricityMeterVO> list = new ArrayList<>();
-        for (MeterImplement meterImplement : meterImplements) {
+        for (Meter meter : meters) {
             ListElectricityMeterVO vo = new ListElectricityMeterVO();
-            vo.setCode(meterImplement.getId());
-            vo.setLabel(meterImplement.getMeterName());
+            vo.setCode(meter.getId());
+            vo.setLabel(meter.getMeterName());
             list.add(vo);
         }
         return list;

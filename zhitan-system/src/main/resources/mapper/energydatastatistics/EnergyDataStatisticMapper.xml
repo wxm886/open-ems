@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zhitan.model.mapper.EnergyDataStatisticMapper">
+<mapper namespace="com.zhitan.energydata.mapper.EnergyDataStatisticMapper">
 
-    <resultMap type="com.zhitan.model.domain.CalcFunction" id="CalcFunctionResult">
+    <resultMap type="com.zhitan.model.domain.RuleFunction" id="CalcFunctionResult">
         <result property="id" column="id"/>
         <result property="info" column="info"/>
         <result property="funcName" column="func_name"/>
@@ -13,10 +13,10 @@
 
     <sql id="selectCalcFunctionVo">
         select id, func_name, func_text, info
-        from calc_function
+        from rule_function
     </sql>
 
-    <select id="selectCalcFunctionList" parameterType="com.zhitan.model.domain.CalcFunction" resultMap="CalcFunctionResult">
+    <select id="selectCalcFunctionList" parameterType="com.zhitan.model.domain.RuleFunction" resultMap="CalcFunctionResult">
         <include refid="selectCalcFunctionVo"/>
         <where>
             <if test="funcName != null  and funcName != ''">and func_name like concat('%', #{funcName}, '%')</if>
@@ -28,8 +28,8 @@
         where id = #{id}
     </select>
 
-    <insert id="insertCalcFunction" parameterType="com.zhitan.model.domain.CalcFunction">
-        insert into calc_function
+    <insert id="insertCalcFunction" parameterType="com.zhitan.model.domain.RuleFunction">
+        insert into rule_function
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null  and id != ''">id,</if>
             <if test="funcName != null  and funcName != ''">func_name,</if>
@@ -44,8 +44,8 @@
         </trim>
     </insert>
 
-    <update id="updateCalcFunction" parameterType="com.zhitan.model.domain.CalcFunction">
-        update calc_function
+    <update id="updateCalcFunction" parameterType="com.zhitan.model.domain.RuleFunction">
+        update rule_function
         <trim prefix="SET" suffixOverrides=",">
             <if test="info != null  and info != ''">info = #{info},</if>
             <if test="funcName != null  and funcName != ''">func_name = #{funcName},</if>
@@ -56,12 +56,12 @@
 
     <delete id="deleteCalcFunctionById" parameterType="String">
         delete
-        from calc_function
+        from rule_function
         where id = #{id}
     </delete>
 
     <delete id="deleteCalcFunctionByIds" parameterType="String">
-        delete from calc_function where id in
+        delete from rule_function where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>

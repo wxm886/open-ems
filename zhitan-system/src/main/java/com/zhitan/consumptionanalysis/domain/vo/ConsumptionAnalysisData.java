@@ -1,11 +1,8 @@
 package com.zhitan.consumptionanalysis.domain.vo;
 
-/**
- * description todu
- *
- * @author hmj
- * @date 2024-10-16 18:04
- */
+import lombok.Data;
+
+@Data
 public class ConsumptionAnalysisData {
 
     /**

@@ -12,8 +12,6 @@ import java.util.List;
 /**
  * 费用分析-成本趋势分析统计图返回值信息
  *
- * @Author: Zhujw
- * @Date: 2023/2/14
 */
 @Data
 @ApiModel(value = "费用分析-成本趋势分析统计图返回值信息", description = "费用分析-成本趋势分析统计图返回值信息")

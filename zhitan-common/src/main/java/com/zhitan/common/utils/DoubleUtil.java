@@ -4,8 +4,6 @@ import cn.hutool.core.util.ObjectUtil;
 
 /**
  * @Description: 数字工具类
- * @author: yxw
- * @date: 2022年02月07日 15:03
  */
 public class DoubleUtil {
     public static double toDouble(String str) {

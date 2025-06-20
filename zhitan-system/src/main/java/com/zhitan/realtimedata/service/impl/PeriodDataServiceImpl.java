@@ -5,37 +5,31 @@ import com.zhitan.common.enums.StatisticType;
 import com.zhitan.common.enums.TimeType;
 import com.zhitan.common.utils.StringUtils;
 import com.zhitan.common.utils.time.TimeManager;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.realtimedata.domain.*;
 import com.zhitan.realtimedata.mapper.PeriodDataMapper;
-import com.zhitan.model.service.IEnergyIndexService;
+import com.zhitan.model.service.IMeterPointService;
 import com.zhitan.realtimedata.service.IPeriodDataService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Created by chongru on 2016-1-22.
- */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class PeriodDataServiceImpl implements IPeriodDataService {
-    private Logger logger = LogManager.getLogger(PeriodDataServiceImpl.class);
-    @Autowired
     private PeriodDataMapper periodDataMapper;
-
-    @Autowired
-    private IEnergyIndexService energyIndexService;
+    private IMeterPointService energyIndexService;
 
     @Override
-    public void save(DataItem data) {
-        String item = periodDataMapper.hasExist(data.getIndexId(), data.getTimeCode());
+    public void save(EnergyUsed data) {
+        String item = periodDataMapper.hasExist(data.getPointId(), data.getTimeCode());
         if (StringUtils.isEmpty(item)) {
             periodDataMapper.insert(data);
         } else {
@@ -55,12 +49,12 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
             try {
                 periodDataMapper.insertTOUDataItems(dataPart);
             } catch (Exception ex) {
-                logger.error("批量保存数据失败", ex);
+                log.error("批量保存数据失败", ex);
                 dataPart.parallelStream().forEach(dataItem -> {
                     try {
                         periodDataMapper.insertTOUData(dataItem);
                     } catch (Exception singleEx) {
-                        logger.error("单个指标数据保存失败！【" + dataItem + "】", singleEx);
+                        log.error("单个指标数据保存失败！【" + dataItem + "】", singleEx);
                     }
                 });
             }
@@ -68,18 +62,18 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public void save(List<DataItem> dataItems) {
-        List<List<DataItem>> splitData = splitList(dataItems, 100);
+    public void save(List<EnergyUsed> energyUseds) {
+        List<List<EnergyUsed>> splitData = splitList(energyUseds, 100);
         splitData.parallelStream().forEach(dataPart -> {
             try {
                 periodDataMapper.saveDataList(dataPart);
             } catch (Exception ex) {
-                logger.error("批量保存数据失败", ex);
+                log.error("批量保存数据失败", ex);
                 dataPart.parallelStream().forEach(dataItem -> {
                     try {
                         periodDataMapper.save(dataItem);
                     } catch (Exception singleEx) {
-                        logger.error("单个指标数据保存失败！【" + dataItem + "】", singleEx);
+                        log.error("单个指标数据保存失败！【" + dataItem + "】", singleEx);
                     }
                 });
             }
@@ -87,22 +81,22 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public void savePeriodData(List<DataItem> dataItems) {
-        Map<String, List<String>> map = dataItems.stream()
-                .collect(Collectors.groupingBy(DataItem::getTimeCode,
-                        Collectors.mapping(DataItem::getIndexId, Collectors.toList())));
+    public void savePeriodData(List<EnergyUsed> energyUseds) {
+        Map<String, List<String>> map = energyUseds.stream()
+                .collect(Collectors.groupingBy(EnergyUsed::getTimeCode,
+                        Collectors.mapping(EnergyUsed::getPointId, Collectors.toList())));
         List<String> keys = periodDataMapper.queryDataItemIsExist(map);
-        List<DataItem> insertData = dataItems.stream()
+        List<EnergyUsed> insertData = energyUseds.stream()
                 .filter(
-                        item -> !keys.contains(String.format("%s:%s", item.getTimeCode(), item.getIndexId())))
+                        item -> !keys.contains(String.format("%s:%s", item.getTimeCode(), item.getPointId())))
                 .collect(Collectors.toList());
         if (!insertData.isEmpty()) {
             periodDataMapper.insertDataList(insertData);
         }
 
-        List<DataItem> updateData = dataItems.stream()
+        List<EnergyUsed> updateData = energyUseds.stream()
                 .filter(
-                        item -> keys.contains(String.format("%s:%s", item.getTimeCode(), item.getIndexId())))
+                        item -> keys.contains(String.format("%s:%s", item.getTimeCode(), item.getPointId())))
                 .collect(Collectors.toList());
         if (!updateData.isEmpty()) {
             periodDataMapper.saveDataList(updateData);
@@ -110,12 +104,12 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public void update(DataItem data) {
+    public void update(EnergyUsed data) {
         periodDataMapper.update(data);
     }
 
     @Override
-    public DataItem getDataByIndex(String indexId, String timeCode) {
+    public EnergyUsed getDataByIndex(String indexId, String timeCode) {
         if (StringUtils.isEmpty(indexId)) {
             return null;
         }
@@ -124,7 +118,7 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public DataItem getDataByIndex(String indexId, Date dataTime, TimeType timeType) {
+    public EnergyUsed getDataByIndex(String indexId, Date dataTime, TimeType timeType) {
         if (StringUtils.isEmpty(indexId)) {
             return null;
         }
@@ -134,7 +128,7 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> getDataItemsByIndex(List<String> indexIds, String timeCode) {
+    public List<EnergyUsed> getDataItemsByIndex(List<String> indexIds, String timeCode) {
         if (indexIds != null && !indexIds.isEmpty()) {
             return periodDataMapper.getDatasByIndex(indexIds, timeCode);
         }
@@ -143,7 +137,7 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> getDataItemsByIndex(List<String> indexIds, Date dataTime, TimeType timeType) {
+    public List<EnergyUsed> getDataItemsByIndex(List<String> indexIds, Date dataTime, TimeType timeType) {
         if (indexIds != null && !indexIds.isEmpty()) {
             String timeCode = TimeManager.getTimeCode(dataTime, timeType);
             return periodDataMapper.getDatasByIndex(indexIds, timeCode);
@@ -153,8 +147,8 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> getDataItemsByIndex(List<String> indexIds, Date beginTime,
-                                              Date endTime, TimeType timeType) {
+    public List<EnergyUsed> getDataItemsByIndex(List<String> indexIds, Date beginTime,
+                                                Date endTime, TimeType timeType) {
         if (indexIds != null && !indexIds.isEmpty()) {
             return periodDataMapper.getPeriodDatasByIndex(indexIds, beginTime, endTime, timeType);
         }
@@ -163,10 +157,10 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> getDataItemsByIndex(String indexId,
-                                              Date beginTime,
-                                              Date endTime,
-                                              TimeType timeType) {
+    public List<EnergyUsed> getDataItemsByIndex(String indexId,
+                                                Date beginTime,
+                                                Date endTime,
+                                                TimeType timeType) {
         if (StringUtils.isEmpty(indexId)) {
             return Collections.emptyList();
         }
@@ -177,8 +171,8 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> getDataItemsByIndex(List<String> indexIds, Date beginTime, Date endTime,
-                                              TimeType timeType, Quality quality) {
+    public List<EnergyUsed> getDataItemsByIndex(List<String> indexIds, Date beginTime, Date endTime,
+                                                TimeType timeType, Quality quality) {
         if (indexIds != null && !indexIds.isEmpty()) {
             return periodDataMapper.getPeriodDatasByIndexAndQuality(indexIds,
                     beginTime,
@@ -211,7 +205,7 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> dataStatisticsByIndexes(List<String> indexIds, StatisticType
+    public List<EnergyUsed> dataStatisticsByIndexes(List<String> indexIds, StatisticType
             statisticType, TimeType timeType, Date beginTime, Date endTime) {
         if (indexIds == null || indexIds.isEmpty()) {
             return Collections.emptyList();
@@ -233,23 +227,23 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
         }
 
         List<String> indexCodes = Collections.singletonList(indexCode);
-        List<DataItem> dataItems = dataStatisticsByCodes(
+        List<EnergyUsed> energyUseds = dataStatisticsByCodes(
                 indexCodes,
                 statisticType,
                 timeType,
                 beginTime,
                 endTime);
-        if (!dataItems.isEmpty()) {
-            return dataItems.get(0).getValue();
+        if (!energyUseds.isEmpty()) {
+            return energyUseds.get(0).getValue();
         }
 
         return 0;
     }
 
     @Override
-    public List<DataItem> dataStatisticsByCodes(List<String> indexCodes,
-                                                StatisticType statisticType, TimeType timeType,
-                                                Date beginTime, Date endTime) {
+    public List<EnergyUsed> dataStatisticsByCodes(List<String> indexCodes,
+                                                  StatisticType statisticType, TimeType timeType,
+                                                  Date beginTime, Date endTime) {
         if (indexCodes == null || indexCodes.isEmpty()) {
             return Collections.emptyList();
         }
@@ -263,11 +257,11 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public List<DataItem> dataStatisticsByCodes(List<String> indexCodes,
-                                                StatisticType statisticType,
-                                                TimeType timeType,
-                                                Date beginTime, Date endTime,
-                                                boolean isFilter) {
+    public List<EnergyUsed> dataStatisticsByCodes(List<String> indexCodes,
+                                                  StatisticType statisticType,
+                                                  TimeType timeType,
+                                                  Date beginTime, Date endTime,
+                                                  boolean isFilter) {
         if (indexCodes == null || indexCodes.isEmpty()) {
             return Collections.emptyList();
         }
@@ -334,16 +328,16 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
         DateTime previousOfBeginTime = getTime(begin, timeType, -1, STATISTIC_QUERY_TYPE);
         DateTime previousOfEndTime = getTime(end, timeType, -1, STATISTIC_QUERY_TYPE);
 
-        List<EnergyIndex> aggregateIndexList = energyIndexService.getEnergyIndexByIds(indexIds);
-        List<DataItem> currentValues = periodDataMapper.statistic(indexIds,
+        List<MeterPoint> aggregateIndexList = energyIndexService.listMeterPointByIds(indexIds);
+        List<EnergyUsed> currentValues = periodDataMapper.statistic(indexIds,
                 timeType,
                 begin.toDate(),
                 end.toDate());
-        List<DataItem> previousValues = periodDataMapper.statistic(indexIds,
+        List<EnergyUsed> previousValues = periodDataMapper.statistic(indexIds,
                 timeType,
                 previousOfBeginTime.toDate(),
                 previousOfEndTime.toDate());
-        List<DataItem> lastYearValues = periodDataMapper.statistic(indexIds,
+        List<EnergyUsed> lastYearValues = periodDataMapper.statistic(indexIds,
                 timeType,
                 lastYearOfBeginTime.toDate(),
                 lastYearOfEndTime.toDate());
@@ -376,12 +370,12 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
         DateTime end = reBuildTime.getEnd();
         DateTime previousOfBeginTime = getTime(begin, timeType, -1, type);
         DateTime previousOfEndTime = getTime(end, timeType, -1, type);
-        List<EnergyIndex> aggregateIndexList = energyIndexService.getEnergyIndexByIds(indexIds);
-        List<DataItem> currentValues = periodDataMapper.statistic(indexIds,
+        List<MeterPoint> aggregateIndexList = energyIndexService.listMeterPointByIds(indexIds);
+        List<EnergyUsed> currentValues = periodDataMapper.statistic(indexIds,
                 timeType,
                 begin.toDate(),
                 end.toDate());
-        List<DataItem> previousValues = periodDataMapper.statistic(indexIds,
+        List<EnergyUsed> previousValues = periodDataMapper.statistic(indexIds,
                 timeType,
                 previousOfBeginTime.toDate(),
                 previousOfEndTime.toDate());
@@ -442,24 +436,24 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
         DateTime begin = reBuildTime.getBegin();
         DateTime end = reBuildTime.getEnd();
 
-        List<EnergyIndex> aggregateIndexList =
-                energyIndexService.getEnergyIndexByCodes(indexCodes);
+        List<MeterPoint> aggregateIndexList =
+                energyIndexService.listMeterPointByCodes(indexCodes);
         DateTime lastYearOfBeginTime = begin.plusYears(-1);
         DateTime lastYearOfEndTime = end.plusYears(-1);
         DateTime previousOfBeginTime = getTime(begin, timeType, -1, STATISTIC_QUERY_TYPE);
         DateTime previousOfEndTime = getTime(end, timeType, -1, STATISTIC_QUERY_TYPE);
 
-        List<DataItem> currentValues = periodDataMapper.statisticByCode(
+        List<EnergyUsed> currentValues = periodDataMapper.statisticByCode(
                 indexCodes,
                 timeType,
                 begin.toDate(),
                 end.toDate());
-        List<DataItem> previousValues = periodDataMapper.statisticByCode(
+        List<EnergyUsed> previousValues = periodDataMapper.statisticByCode(
                 indexCodes,
                 timeType,
                 previousOfBeginTime.toDate(),
                 previousOfEndTime.toDate());
-        List<DataItem> lastYearValues = periodDataMapper.statisticByCode(
+        List<EnergyUsed> lastYearValues = periodDataMapper.statisticByCode(
                 indexCodes,
                 timeType,
                 lastYearOfBeginTime.toDate(),
@@ -477,16 +471,16 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
     @Override
-    public DataItem getDataByIndexCode(String indexCode, String timeCode) {
+    public EnergyUsed getDataByIndexCode(String indexCode, String timeCode) {
         return periodDataMapper.getDataByIndexCode(indexCode, timeCode);
     }
 
-    private DataItem findValue(List<DataItem> items, String indexId, DateTime dataTime) {
-        Optional<DataItem> value = items.stream()
-                .filter(f -> StringUtils.equalsIgnoreCase(f.getIndexId(), indexId)
+    private EnergyUsed findValue(List<EnergyUsed> items, String indexId, DateTime dataTime) {
+        Optional<EnergyUsed> value = items.stream()
+                .filter(f -> StringUtils.equalsIgnoreCase(f.getPointId(), indexId)
                         && dataTime.equals(new DateTime(f.getDataTime())))
                 .findAny();
-        return value.orElseGet(DataItem::new);
+        return value.orElseGet(EnergyUsed::new);
 
     }
 
@@ -518,17 +512,17 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
     }
 
 
-    private List<StatisticResult> buildNewDatas(List<EnergyIndex> indexList, TimeType timeType,
-                                                List<DataItem> currentValues,
-                                                List<DataItem> previousValues,
-                                                List<DataItem> lastYearValues,
+    private List<StatisticResult> buildNewDatas(List<MeterPoint> indexList, TimeType timeType,
+                                                List<EnergyUsed> currentValues,
+                                                List<EnergyUsed> previousValues,
+                                                List<EnergyUsed> lastYearValues,
                                                 List<StatisticResult> statisticResults,
                                                 DateTime beginTime,
                                                 DateTime endTime, String type) {
         List<StatisticResult> results = new ArrayList<>();
         indexList.forEach(index -> {
             DateTime tmpTime = beginTime;
-            String indexId = index.getIndexId();
+            String indexId = index.getPointId();
             Optional<StatisticResult> statisticResult;
             if (statisticResults == null) {
                 statisticResult = Optional.empty();
@@ -552,15 +546,15 @@ public class PeriodDataServiceImpl implements IPeriodDataService {
                 }
 
                 result.setDataTime(tmpTime.toDate());
-                DataItem currentValue = findValue(currentValues, indexId, tmpTime);
+                EnergyUsed currentValue = findValue(currentValues, indexId, tmpTime);
                 result.setCurrentValue(currentValue.getValue() == null ? 0 : currentValue.getValue());
 
                 DateTime preTime = getTime(tmpTime, timeType, -1, type);
-                DataItem previousValue = findValue(previousValues, indexId, preTime);
+                EnergyUsed previousValue = findValue(previousValues, indexId, preTime);
                 result.setPreviousValue(previousValue.getValue() == null ? 0 : previousValue.getValue());
 
                 DateTime lastYearTime = tmpTime.plusYears(-1);
-                DataItem lastYearValue = findValue(lastYearValues, indexId, lastYearTime);
+                EnergyUsed lastYearValue = findValue(lastYearValues, indexId, lastYearTime);
                 result.setLastYearValue(lastYearValue.getValue() == null ? 0 : lastYearValue.getValue());
                 results.add(result);
                 tmpTime = getTime(tmpTime, timeType, 1, STATISTIC_QUERY_TYPE);

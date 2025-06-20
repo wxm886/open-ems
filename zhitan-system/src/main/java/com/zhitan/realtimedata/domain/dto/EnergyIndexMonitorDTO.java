@@ -2,14 +2,14 @@ package com.zhitan.realtimedata.domain.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 /**
  * @Description 能源点位监测请求 DTO
- * @Author zhoubg
- * @date 2024-10-15
  **/
+@Data
 @ApiModel(value = "指标信息")
 public class EnergyIndexMonitorDTO {
     /**
@@ -28,27 +28,4 @@ public class EnergyIndexMonitorDTO {
     @ApiModelProperty(value = "能源类型")
     private String energyType;
 
-    public String getIndexType() {
-        return indexType;
-    }
-
-    public void setIndexType(String indexType) {
-        this.indexType = indexType;
-    }
-
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getEnergyType() {
-        return energyType;
-    }
-
-    public void setEnergyType(String energyType) {
-        this.energyType = energyType;
-    }
 }

@@ -8,8 +8,7 @@ import java.util.List;
 /**
  *工序能耗 日
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 public interface IDailyProcessEnergyService {
 

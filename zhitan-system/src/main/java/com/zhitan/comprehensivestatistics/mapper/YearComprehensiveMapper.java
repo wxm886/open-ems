@@ -9,8 +9,7 @@ import java.util.List;
 /**
  * 全厂综合能耗统计 年
  * 
- * @author sys
- * @date 2020-03-25
+ * @author zhitan
  */
 public interface YearComprehensiveMapper {
     /**

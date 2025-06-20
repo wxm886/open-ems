@@ -4,8 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * longid
- * @author Geoffrey
- * @date 2024/12/31
+ * @author zhitan
  */
 public class IncrLongIdUtil {
 

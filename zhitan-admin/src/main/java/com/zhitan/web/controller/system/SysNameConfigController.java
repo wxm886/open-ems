@@ -13,14 +13,12 @@ import javax.annotation.Resource;
 
 /**
  * 系统名称配置Controller
- * 
- * @author ZhiTan
- * @date 2024-11-05
+ *
+ * @author zhitan
  */
 @RestController
 @RequestMapping("/system/nameconfig")
-public class SysNameConfigController extends BaseController
-{
+public class SysNameConfigController extends BaseController {
     @Resource
     private ISysNameConfigService sysNameConfigService;
 
@@ -30,8 +28,7 @@ public class SysNameConfigController extends BaseController
      */
     @Log(title = "系统名称配置", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult save(@RequestBody SysNameConfig sysNameConfig)
-    {
+    public AjaxResult save(@RequestBody SysNameConfig sysNameConfig) {
         return toAjax(sysNameConfigService.saveOrUpdate(sysNameConfig));
     }
 
@@ -40,8 +37,7 @@ public class SysNameConfigController extends BaseController
      */
     @GetMapping
     @Anonymous
-    public AjaxResult getSysNameConfig()
-    {
+    public AjaxResult getSysNameConfig() {
         return AjaxResult.success(sysNameConfigService.getSysNameConfig());
     }
 

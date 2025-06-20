@@ -1,11 +1,10 @@
 package com.zhitan.realtimedata.service.impl;
 
 import cn.hutool.core.date.DateUtil;
-import com.zhitan.basicdata.domain.MeterImplement;
-import com.zhitan.basicdata.services.IMeterImplementService;
+import com.zhitan.meter.domain.Meter;
 import com.zhitan.common.core.domain.entity.SysDictData;
-import com.zhitan.model.domain.EnergyIndex;
-import com.zhitan.model.service.IEnergyIndexService;
+import com.zhitan.model.domain.MeterPoint;
+import com.zhitan.model.service.IMeterPointService;
 import com.zhitan.model.service.IModelNodeService;
 import com.zhitan.realtimedata.domain.TagValue;
 import com.zhitan.realtimedata.domain.dto.EnergyIndexMonitorDTO;
@@ -13,8 +12,9 @@ import com.zhitan.realtimedata.domain.vo.*;
 import com.zhitan.realtimedata.service.RealtimeDatabaseService;
 import com.zhitan.realtimedata.service.RealtimeTrendService;
 import com.zhitan.system.service.ISysDictDataService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -26,31 +26,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author zhoubg
- * @date 2024-10-15
- **/
+@Slf4j
 @Service
+@AllArgsConstructor
 public class RealtimeTrendServiceImpl implements RealtimeTrendService {
 
-    @Autowired
     private  IModelNodeService modelNodeService;
-
-    @Autowired
-    private  IEnergyIndexService energyIndexService;
-
-    @Autowired
-    private IMeterImplementService meterImplementService;
-
-    @Autowired
+    private IMeterPointService energyIndexService;
     private RealtimeDatabaseService realtimeDatabaseService;
-
-    @Autowired
     private ISysDictDataService dictDataService;
-
-    @Autowired
-    private IEnergyIndexService iEnergyIndexService;
+    private IMeterPointService iMeterPointService;
 
     @Override
     public List<RealTimeDataVO> list(EnergyIndexMonitorDTO dto) {
@@ -62,22 +47,22 @@ public class RealtimeTrendServiceImpl implements RealtimeTrendService {
 
         // 根据模型id查询计量器具信息
         String nodeId = dto.getNodeId();
-        List<MeterImplement> meterImplementList = modelNodeService.getSettingDeviceIndex(nodeId,dto.getEnergyType());
-        if (CollectionUtils.isEmpty(meterImplementList)) {
+        List<Meter> meterList = modelNodeService.getSettingDeviceIndex(nodeId,dto.getEnergyType());
+        if (CollectionUtils.isEmpty(meterList)) {
             return realTimeList;
         }
-        List<String> meterIds = meterImplementList.stream().map(MeterImplement::getId).collect(Collectors.toList());
+        List<String> meterIds = meterList.stream().map(Meter::getId).collect(Collectors.toList());
         if(CollectionUtils.isEmpty(meterIds)){
             throw new RuntimeException("请先添加计量器具！");
         }
-        List<EnergyIndex> energyIndexList = energyIndexService.listIndexByMeterIds(nodeId,meterIds);
+        List<MeterPoint> meterPointList = energyIndexService.listMeterPointByMeterIds(nodeId,meterIds);
 
         // 查询实时数据
-        List<String> meterCodes = meterImplementList.stream().map(MeterImplement::getCode).collect(Collectors.toList());
+        List<String> meterCodes = meterList.stream().map(Meter::getCode).collect(Collectors.toList());
         List<TagValue> tagValueList = realtimeDatabaseService.retrieve(meterCodes);
 
-        Map<String, List<EnergyIndex>> meterIndexMap = energyIndexList.stream().collect(Collectors.groupingBy(
-                EnergyIndex::getMeterId));
+        Map<String, List<MeterPoint>> meterIndexMap = meterPointList.stream().collect(Collectors.groupingBy(
+                MeterPoint::getMeterId));
 
         // 查询器具类型
         Map<String, String> typeMap = dictDataService.selectDictDataByType("sys_device_type")
@@ -87,25 +72,25 @@ public class RealtimeTrendServiceImpl implements RealtimeTrendService {
             RealTimeDataVO vo = new RealTimeDataVO();
             vo.setEnergyTypeName(value);
             List<SensorParamModel> sensorModelList = new ArrayList<>();
-            meterImplementList.stream().filter(li -> key.equals(li.getMeterType())).forEach(meter -> {
+            meterList.stream().filter(li -> key.equals(li.getMeterType())).forEach(meter -> {
                 SensorParamModel sensorModel = new SensorParamModel();
                 sensorModel.setDeviceName(meter.getMeterName());
                 sensorModel.setEnergyTypeName(value);
                 sensorModel.setWireDiameter(meter.getWireDiameter());
                 sensorModel.setMaxAllowablePower(meter.getMaxAllowablePower());
                 List<RealTimeIndexModel> indexModelList = new ArrayList<>();
-                List<EnergyIndex> indexList = meterIndexMap.get(meter.getId());
+                List<MeterPoint> indexList = meterIndexMap.get(meter.getId());
 
                 if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(indexList)) {
-                    List<String> indexCodeList = indexList.stream().map(EnergyIndex::getCode).collect(Collectors.toList());
+                    List<String> indexCodeList = indexList.stream().map(MeterPoint::getCode).collect(Collectors.toList());
                     Map<String, String> tagValueMap = tagValueList.stream().filter(li -> indexCodeList.contains(li.getTagCode()))
                             .collect(Collectors.toMap(TagValue::getTagCode,o->o.getValue() + "@" + DateUtil.format(o.getDataTime(),"yyyy-MM-dd HH:mm:ss" )));
-                    for (EnergyIndex energyIndex : indexList) {
+                    for (MeterPoint meterPoint : indexList) {
                         RealTimeIndexModel model = new RealTimeIndexModel();
-                        String code = energyIndex.getCode();
+                        String code = meterPoint.getCode();
                         model.setIndexCode(code);
-                        model.setName(energyIndex.getName());
-                        model.setUnit(energyIndex.getUnitId());
+                        model.setName(meterPoint.getName());
+                        model.setUnit(meterPoint.getUnitId());
                         String tagValue = tagValueMap.get(code);
                       
                         if (StringUtils.isNotEmpty(tagValue)) {
@@ -155,11 +140,11 @@ public class RealtimeTrendServiceImpl implements RealtimeTrendService {
         int pointCount = Integer.parseInt(String.valueOf(millis / (1000 * 60 * 15)));
         List<TagValue> tagValueList = realtimeDatabaseService.retrieve(tagCode,begin,finish,pointCount);
         // 获取单位
-        EnergyIndex energyIndex = iEnergyIndexService.getiEnergyIndexByCode(tagCode);
+        MeterPoint meterPoint = iMeterPointService.getMeterPointByCode(tagCode);
         tagValueList.forEach(li ->{
             EquipmentPointParametersExcel item = new EquipmentPointParametersExcel();
             item.setIndexName(li.getTagCode());
-            item.setIndexUnit(energyIndex.getUnitId());
+            item.setIndexUnit(meterPoint.getUnitId());
             item.setTimeString(DateUtil.formatDateTime(li.getDataTime()));
             item.setValue(li.getValue().toString());
             excelList.add(item);

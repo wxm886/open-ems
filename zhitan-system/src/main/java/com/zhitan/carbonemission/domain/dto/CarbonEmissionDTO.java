@@ -3,6 +3,7 @@ package com.zhitan.carbonemission.domain.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zhitan.common.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,11 +12,9 @@ import java.util.Date;
 /**
  *  碳排放核算
  *
- * @author lsk
- * @date 2024-10-29 17:55
+ * @author zhitan
  */
-@Getter
-@Setter
+@Data
 public class CarbonEmissionDTO {
     @ApiModelProperty(value = "节点id")
     private String nodeId;

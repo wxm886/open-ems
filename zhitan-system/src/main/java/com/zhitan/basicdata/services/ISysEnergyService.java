@@ -10,8 +10,7 @@ import java.util.List;
 /**
  * energyService接口
  *
- * @author ruoyi
- * @date 2020-02-12
+ * @author zhitan
  */
 public interface ISysEnergyService {
     /**
@@ -63,14 +62,6 @@ public interface ISysEnergyService {
     int deleteSysEnergyById(Integer enerid);
 
     /**
-     * 查询能源类型下拉框
-     *
-     * @param
-     * @return 结果
-     */
-    List getenerclassname();
-
-    /**
      * 查询能源类型id by enerclassname
      */
     Integer getEnerClassid(String enerclassname);
@@ -84,32 +75,6 @@ public interface ISysEnergyService {
      * 修改的时候查询一样能源名称的id
      */
     Integer selectIdByName(String enername);
-    /**
-     * 通过能源id查询单价信息
-     */
-    Integer getPriceCountByEnerid(SysEnergy sysEnergy);
-    /**
-     * 增加单价信息
-     */
-    Integer insertEnergyPrice(SysEnergy sysEnergy);
-    /**
-     * 修改单价信息
-     */
-    Integer updateEnergyPrice(SysEnergy sysEnergy);
-    /**
-     * 通过能源id查折标系数num
-     */
-    Integer getCoefficientCountByEnerid(Integer enerid);
-
-    /**
-     * 增加折标系数信息
-     */
-    Integer insertEnergyCoefficient(SysEnergy sysEnergy);
-
-    /**
-     * 修改折标系数信息
-     */
-    Integer updateEnergyCoefficient(SysEnergy sysEnergy);
 
     /**
      * 查询所有能源类型信息

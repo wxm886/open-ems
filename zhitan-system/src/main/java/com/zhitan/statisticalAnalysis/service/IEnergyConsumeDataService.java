@@ -40,5 +40,5 @@ public interface IEnergyConsumeDataService {
      * @param comparisonType 对比类型
      * @return
      */
-    public List<EnergyTypeValueContrastedVO> listEnergyTypeYoyInfo(QueryCompareRequest req, String comparisonType);
+    List<EnergyTypeValueContrastedVO> listEnergyTypeYoyInfo(QueryCompareRequest req, String comparisonType);
 }

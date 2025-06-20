@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.costmanagement.mapper.CostPriceTacticsMapper">
 
-    <resultMap type="CostPriceTactics" id="CostPriceTacticsResult">
+    <resultMap type="com.zhitan.costmanagement.domain.CostPriceTactics" id="CostPriceTacticsResult">
         <result property="id"    column="id"    />
         <result property="type"    column="type"    />
         <result property="createTime"    column="create_time"    />
@@ -21,7 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, type, create_time, create_by, update_time, update_by, remark, tactics_number, tactics_name, energy_type from cost_price_tactics
     </sql>
 
-    <select id="selectCostPriceTacticsList" parameterType="CostPriceTactics" resultMap="CostPriceTacticsResult">
+    <select id="selectCostPriceTacticsList" parameterType="com.zhitan.costmanagement.domain.CostPriceTactics" resultMap="CostPriceTacticsResult">
         <include refid="selectCostPriceTacticsVo"/>
         <where>
             <if test="type != null  and type != ''"> and type = #{type}</if>
@@ -36,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <insert id="insertCostPriceTactics" parameterType="CostPriceTactics">
+    <insert id="insertCostPriceTactics" parameterType="com.zhitan.costmanagement.domain.CostPriceTactics">
         insert into cost_price_tactics
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null and id != ''">id,</if>
@@ -64,7 +64,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateCostPriceTactics" parameterType="CostPriceTactics">
+    <update id="updateCostPriceTactics" parameterType="com.zhitan.costmanagement.domain.CostPriceTactics">
         update cost_price_tactics
         <trim prefix="SET" suffixOverrides=",">
             <if test="type != null">type = #{type},</if>

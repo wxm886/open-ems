@@ -2,8 +2,6 @@ package com.zhitan.common.utils;
 
 /**
  * @Description: 整数相关工具类
- * @author: yxw
- * @date: 2022年03月10日 17:31
  */
 public class IntegerUtil {
     /**

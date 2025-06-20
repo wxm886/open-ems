@@ -3,6 +3,7 @@ package com.zhitan.comprehensivestatistics.service.impl;
 import com.zhitan.comprehensivestatistics.domain.MonthlyComprehensive;
 import com.zhitan.comprehensivestatistics.mapper.MonthlyComprehensiveMapper;
 import com.zhitan.comprehensivestatistics.service.ImonthlyComprehensive;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +15,11 @@ import java.util.List;
 /**
  * 业务层处理
  * 
- * @author sys
- * @date 2020-03-25
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public class MonthlyComprehensiveServiceImpl implements ImonthlyComprehensive {
-    @Resource
     private MonthlyComprehensiveMapper monthMapper;
 
     public List<MonthlyComprehensive> getMonthlyComprehensiveList(String nodeId, List<MonthlyComprehensive> dataList,

@@ -7,8 +7,6 @@ import lombok.Data;
 /**
  * 能源类型信息类
  *
- * @Author: Zhujw
- * @Date: 2023/5/23
  */
 @Data
 public class EnergyTypeModel {

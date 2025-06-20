@@ -2,13 +2,14 @@ package com.zhitan.alarm.domain;
 
 
 import com.zhitan.common.annotation.Excel;
+import lombok.Data;
 
 /**
  * 历史表格导出
  *
- * @author
- * @date 2020-03-20
+ * @author zhitan
  */
+@Data
 public class HistoryTable {
 
     /**
@@ -41,44 +42,4 @@ public class HistoryTable {
     @Excel(name = "实时值")
     private Double earlyWarningValue;
 
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getAlarmTime() {
-        return alarmTime;
-    }
-
-    public void setAlarmTime(String alarmTime) {
-        this.alarmTime = alarmTime;
-    }
-
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
-    public String getUnitName() {
-        return unitName;
-    }
-
-    public void setUnitName(String unitName) {
-        this.unitName = unitName;
-    }
-
-    public Double getEarlyWarningValue() {
-        return earlyWarningValue;
-    }
-
-    public void setEarlyWarningValue(Double earlyWarningValue) {
-        this.earlyWarningValue = earlyWarningValue;
-    }
 }

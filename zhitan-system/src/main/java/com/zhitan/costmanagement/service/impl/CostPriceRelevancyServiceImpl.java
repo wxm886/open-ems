@@ -2,13 +2,12 @@ package com.zhitan.costmanagement.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import java.util.List;
+
 import java.util.UUID;
 
 import com.zhitan.common.utils.DateUtils;
 import com.zhitan.common.utils.StringUtils;
-import com.zhitan.costmanagement.domain.CostElectricityInput;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.zhitan.costmanagement.mapper.CostPriceRelevancyMapper;
 import com.zhitan.costmanagement.domain.CostPriceRelevancy;
@@ -19,11 +18,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
  * 单价关联Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-11-09
  */
 @Service
+@AllArgsConstructor
 public class CostPriceRelevancyServiceImpl extends ServiceImpl<CostPriceRelevancyMapper, CostPriceRelevancy> implements ICostPriceRelevancyService {
-    @Autowired
+
     private CostPriceRelevancyMapper costPriceRelevancyMapper;
 
     /**

@@ -11,8 +11,6 @@ import java.util.Date;
 /**
  * 数据分析环比 请求参数
  *
- * @Author: Zhujw
- * @Date: 2023/3/3
  */
 @Data
 public class DataAnalysisMoMDTO {

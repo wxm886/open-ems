@@ -11,8 +11,7 @@ import java.util.List;
 /**
  * 重点设备能耗统计 年
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 public interface IYearKeyEquipmentService {
     List<YearKeyEquipment> getYearKeyEquipmentList(List<String> indexIds, List<TypeTime> dataList, Date beginTime, Date endTime, String timeType, String indexStorageId);

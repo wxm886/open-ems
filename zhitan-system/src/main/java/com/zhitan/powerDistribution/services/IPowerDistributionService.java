@@ -8,6 +8,7 @@ import com.zhitan.powerDistribution.domain.PowerDistribution;
 import java.util.List;
 
 public interface IPowerDistributionService extends IService<PowerDistribution> {
+
     List<PowerDistribution> selectPowerDistributionList(PowerDistribution powerDistribution);
 
     IPage<PowerDistribution> pageList(PowerDistribution powerDistribution, Page<PowerDistribution> page);

@@ -12,30 +12,28 @@ import com.zhitan.costmanagement.domain.CostPriceTactics;
 import com.zhitan.costmanagement.domain.vo.CostPriceTacticsVo;
 import com.zhitan.costmanagement.service.ICostPriceTacticsService;
 import com.zhitan.framework.web.service.TokenService;
-import com.zhitan.peakvalley.service.IElectricityPriceDateService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
  * 成本策略Controller
  *
- * @author ZhiTan
- * @date 2024-11-08
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "成本策略管理")
 @RequestMapping("/cost/tactics")
 public class CostPriceTacticsController extends BaseController
 {
-    @Resource
     private ICostPriceTacticsService costPriceTacticsService;
-    @Autowired
     private TokenService tokenService;
-    @Resource
-    private IElectricityPriceDateService electricityPriceDateService;
 
     /**
      * 查询成本策略列表
@@ -59,19 +57,6 @@ public class CostPriceTacticsController extends BaseController
 
         return AjaxResult.success(list);
     }
-
-//    /**
-//     * 导出成本策略列表
-//     */
-//    @PreAuthorize("@ss.hasPermi('costmanagement:tactics:export')")
-//    @Log(title = "成本策略", businessType = BusinessType.EXPORT)
-//    @PostMapping("/export")
-//    public void export(HttpServletResponse response, CostPriceTactics costPriceTactics)
-//    {
-//        List<CostPriceTactics> list = costPriceTacticsService.selectCostPriceTacticsList(costPriceTactics);
-//        ExcelUtil<CostPriceTactics> util = new ExcelUtil<CostPriceTactics>(CostPriceTactics.class);
-//        util.exportExcel(response, list, "成本策略数据");
-//    }
 
     /**
      * 获取成本策略详细信息

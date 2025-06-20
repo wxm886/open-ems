@@ -6,7 +6,7 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:postgresql://127.0.0.1:5432/zhitan_ems
+        url: jdbc:postgresql://localhost:5432/zhitan_ems
         username: postgres
         password: postgres
       # 从库数据源
@@ -59,3 +59,18 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+
+aliyun:
+  sms:
+    access-key-id: 123
+    access-key-secret: 123
+    endpoint: dysmsapi.aliyuncs.com
+    sign-name: xxxx
+    template-code: xxxx
+    user-role-id: 123
+    time-minutes: 40
+    max-sms-count: 1
+
+sso:
+  ticket: gwo9J8lBCcSOBTI6
+  username: tanyuanjie

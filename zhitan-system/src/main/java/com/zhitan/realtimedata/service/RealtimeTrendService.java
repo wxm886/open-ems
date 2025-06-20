@@ -8,11 +8,6 @@ import com.zhitan.realtimedata.domain.vo.RealTimeHistoryDataVO;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author zhoubg
- * @date 2024-10-15
- **/
 public interface RealtimeTrendService {
 
     List<RealTimeDataVO> list(EnergyIndexMonitorDTO energyIndexMonitorDTO);

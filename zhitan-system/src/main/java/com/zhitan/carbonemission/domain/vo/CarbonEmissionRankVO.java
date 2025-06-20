@@ -5,8 +5,6 @@ import lombok.Data;
 
 @Data
 public class CarbonEmissionRankVO {
-
-
     @ApiModelProperty(value = "节点名称")
     private String nodeName;
     @ApiModelProperty(value = "全部碳排放量")

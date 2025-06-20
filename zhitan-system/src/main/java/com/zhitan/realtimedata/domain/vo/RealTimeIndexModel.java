@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 /**
  * @Description 实时数据-能源点位数据
  *
- * @Author zhoubg
- * @date 2024-10-16
  **/
 @Data
 public class RealTimeIndexModel {

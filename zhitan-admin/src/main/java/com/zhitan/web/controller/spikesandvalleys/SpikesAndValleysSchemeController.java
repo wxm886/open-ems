@@ -1,10 +1,6 @@
 package com.zhitan.web.controller.spikesandvalleys;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.alarm.domain.LimitType;
 import com.zhitan.common.core.domain.model.LoginUser;
 import com.zhitan.common.core.page.TableDataInfo;
 import com.zhitan.common.utils.ServletUtils;
@@ -12,9 +8,10 @@ import com.zhitan.framework.web.service.TokenService;
 import com.zhitan.spikesandvalleys.domain.SpikesAndValleysScheme;
 import com.zhitan.spikesandvalleys.domain.vo.SpikesAndValleysSchemeVo;
 import com.zhitan.spikesandvalleys.service.ISpikesAndValleysSchemeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import javax.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,23 +25,21 @@ import com.zhitan.common.core.controller.BaseController;
 import com.zhitan.common.core.domain.AjaxResult;
 import com.zhitan.common.enums.BusinessType;
 
-import com.zhitan.common.utils.poi.ExcelUtil;
-
 /**
  * 尖峰平谷时间段明细Controller
  * 
- * @author ZhiTan
- * @date 2024-10-29
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "尖峰平谷时间段明细")
 @RequestMapping("/system/scheme")
 public class SpikesAndValleysSchemeController extends BaseController
 {
-    @Resource
     private ISpikesAndValleysSchemeService spikesAndValleysSchemeService;
-
-    @Autowired
     private TokenService tokenService;
+
     /**
      * 查询尖峰平谷时间段明细列表
      */
@@ -52,10 +47,7 @@ public class SpikesAndValleysSchemeController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SpikesAndValleysScheme spikesAndValleysScheme, Long pageNum, Long pageSize)
     {
-//        startPage();
-
         Page<SpikesAndValleysSchemeVo> page =  spikesAndValleysSchemeService.selectSpikesAndValleysSchemeList(spikesAndValleysScheme, pageNum, pageSize);
-
         return getDataTable(page);
     }
 

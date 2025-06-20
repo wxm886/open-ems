@@ -19,6 +19,7 @@ import com.zhitan.costmanagement.mapper.CostPriceTacticsItemMapper;
 import com.zhitan.spikesandvalleys.domain.SpikesAndValleysItem;
 import com.zhitan.spikesandvalleys.domain.SpikesAndValleysScheme;
 import com.zhitan.spikesandvalleys.domain.vo.SpikesAndValleysSchemeVo;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,13 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
  * 成本策略Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-11-08
  */
 @Service
+@AllArgsConstructor
 public class CostPriceTacticsServiceImpl extends ServiceImpl<CostPriceTacticsMapper, CostPriceTactics> implements ICostPriceTacticsService {
-    @Autowired
     private CostPriceTacticsMapper costPriceTacticsMapper;
-    @Autowired
     private CostPriceTacticsItemMapper costPriceTacticsItemMapper;
 
 

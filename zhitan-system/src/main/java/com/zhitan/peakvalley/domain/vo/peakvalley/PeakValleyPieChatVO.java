@@ -3,8 +3,7 @@ package com.zhitan.peakvalley.domain.vo.peakvalley;
 /**
  * description 尖峰平谷饼状图
  *
- * @author hmj
- * @date 2024-09-24 16:39
+ * @author zhitan
  */
 public class PeakValleyPieChatVO {
     /**

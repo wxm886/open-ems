@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
  * 成本策略Service接口
  *
  * @author ZhiTan
- * @date 2024-11-08
  */
 public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
     /**
@@ -19,7 +18,7 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
      * @param id 成本策略主键
      * @return 成本策略
      */
-    public CostPriceTactics selectCostPriceTacticsById(String id);
+    CostPriceTactics selectCostPriceTacticsById(String id);
 
     /**
      * 查询成本策略列表
@@ -27,7 +26,7 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
      * @param costPriceTactics 成本策略
      * @return 成本策略集合
      */
-    public Page<CostPriceTacticsVo> selectCostPriceTacticsList(CostPriceTactics costPriceTactics, Long pageNum, Long pageSize);
+    Page<CostPriceTacticsVo> selectCostPriceTacticsList(CostPriceTactics costPriceTactics, Long pageNum, Long pageSize);
 
     /**
      * 查询所有单价策略列表
@@ -35,7 +34,7 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
 
      * @return 成本策略集合
      */
-    public List<CostPriceTacticsVo> selectCostPriceTacticsListAll();
+    List<CostPriceTacticsVo> selectCostPriceTacticsListAll();
 
     /**
      * 新增成本策略
@@ -43,7 +42,7 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
      * @param costPriceTacticsVo 成本策略
      * @return 结果
      */
-    public int insertCostPriceTactics(CostPriceTacticsVo costPriceTacticsVo) throws Exception;
+    int insertCostPriceTactics(CostPriceTacticsVo costPriceTacticsVo) throws Exception;
 
     /**
      * 修改成本策略
@@ -51,7 +50,7 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
      * @param costPriceTacticsVo 成本策略
      * @return 结果
      */
-    public int updateCostPriceTactics(CostPriceTacticsVo costPriceTacticsVo);
+    int updateCostPriceTactics(CostPriceTacticsVo costPriceTacticsVo);
 
     /**
      * 批量删除成本策略
@@ -59,7 +58,7 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
      * @param ids 需要删除的成本策略主键集合
      * @return 结果
      */
-    public int deleteCostPriceTacticsByIds(String[] ids);
+    int deleteCostPriceTacticsByIds(String[] ids);
 
     /**
      * 删除成本策略信息
@@ -67,5 +66,5 @@ public interface ICostPriceTacticsService extends IService<CostPriceTactics> {
      * @param id 成本策略主键
      * @return 结果
      */
-    public int deleteCostPriceTacticsById(String id);
+    int deleteCostPriceTacticsById(String id);
 }

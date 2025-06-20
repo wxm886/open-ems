@@ -12,8 +12,6 @@ import java.math.BigDecimal;
 /**
  * 成本趋势-能源类型
  *
- * @Author: Zhujw
- * @Date: 2023/2/14
  */
 @Data
 @ApiModel(value = "成本趋势-能源类型", description = "成本趋势-能源类型")

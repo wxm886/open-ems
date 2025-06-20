@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.keyequipment.mapper.DailyKeyEquipmentMapper">
     <resultMap id="dataItemMap" type="com.zhitan.keyequipment.domain.DailyKeyEquipment">
-        <result column="index_id" property="indexId"/>
-        <result column="index_name" property="indexName"/>
+        <result column="point_id" property="indexId"/>
+        <result column="point_name" property="indexName"/>
         <result column="time_type" property="timeType"/>
         <result column="time_code" property="timeCode"/>
         <result column="unit_id" property="unitId"/>
@@ -36,65 +36,65 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
     <select id="getdailyKeyEquipmentList" resultMap="dataItemMap">
         SELECT
-            aa.index_id,
-            aa.index_name,
-            aa.unit_id,
-            <foreach item="item" index="index" collection="dataList">
-                MAX ( CASE WHEN data_time = #{item.dataTime} THEN "value" END ) AS ${item.value},
-            </foreach>
-            aa.time_type
+        aa.point_id,
+        aa.point_name,
+        aa.unit_id,
+        <foreach item="item" index="index" collection="dataList">
+            MAX ( CASE WHEN data_time = #{item.dataTime} THEN "value" END ) AS ${item.value},
+        </foreach>
+        aa.time_type
         FROM
         (
-            SELECT
-                ni.index_id,
-                ei.NAME  AS "index_name",
-                ei.unit_id,
-                di."value",
-                di.data_time,
-                di.time_type
-            FROM
-                model_node mn
-                LEFT JOIN node_index ni ON ni.node_id = mn.node_id
-                LEFT JOIN energy_index ei ON ei.index_id = ni.index_id
-                LEFT JOIN data_item di ON ni.index_id = di.index_id
-            WHERE
-                di.data_time >= #{beginTime}
-                AND di.data_time &lt; #{endTime}
-                AND di.index_id IN
-                    <foreach item="indexId" index="index" collection="indexIds"  open="(" separator="," close=")">
-                        #{indexId}
-                    </foreach>
-                AND di.time_type = #{timeType}
-                <if test="indexStorageId !='' and indexStorageId !=null">
-                    and ei.energy_id=#{indexStorageId}
-                </if>
+        SELECT
+        ei.point_id,
+        ei.NAME AS point_name,
+        ei.unit_id,
+        di."value",
+        di.data_time,
+        di.time_type
+        FROM
+        model_node mn
+        LEFT JOIN node_point ni ON ni.node_id = mn.node_id
+        LEFT JOIN meter_point ei ON ei.point_id = ni.point_id
+        LEFT JOIN energy_used di ON ni.point_id = di.point_id
+        WHERE
+        di.data_time >= #{beginTime}
+        AND di.data_time &lt; #{endTime}
+        AND di.point_id IN
+        <foreach item="indexId" index="index" collection="indexIds" open="(" separator="," close=")">
+            #{indexId}
+        </foreach>
+        AND di.time_type = #{timeType}
+        <if test="indexStorageId !='' and indexStorageId !=null">
+            and ei.energy_id=#{indexStorageId}
+        </if>
         ) aa
         GROUP BY
-            aa.index_id, aa.index_name, aa.unit_id, aa.time_type
+        aa.point_id, aa.point_name, aa.unit_id, aa.time_type
     </select>
 
     <select id="getListChart" resultMap="dataItemMap">
         SELECT
-            di.index_id,
-            ci.name AS "index_name",
-            ci.unit_id,
-            di."value",
-            di.data_time,
-            di.time_type,
-            di.time_code
+        ci.point_id,
+        ci.name AS point_name,
+        ci.unit_id,
+        di."value",
+        di.data_time,
+        di.time_type,
+        di.time_code
         FROM
-        data_item di LEFT JOIN energy_index ci ON di.index_id = ci.index_id
+        energy_used di LEFT JOIN meter_point ci ON di.point_id = ci.point_id
         WHERE
-            di.index_id =#{indexId}
-            AND di.data_time &lt; #{endTime}
-            AND di.data_time >= #{beginTime}
-            AND di.time_type = #{timeType}
+        di.point_id =#{indexId}
+        AND di.data_time &lt; #{endTime}
+        AND di.data_time >= #{beginTime}
+        AND di.time_type = #{timeType}
         order by di.data_time
     </select>
-    <select id="getFacilityArchives" resultType="com.zhitan.basicdata.domain.FacilityArchives">
-        SELECT ID,code,facility_name AS facilityName FROM facility_archives
+    <select id="getFacilityArchives" resultType="com.zhitan.basicdata.domain.Device">
+        SELECT ID,code,device_name AS facilityName FROM device
     </select>
-    <select id="getPointFacility" resultType="com.zhitan.basicdata.domain.FacilityArchives">
-        SELECT ID,code,facility_name AS facilityName FROM facility_archives where point_flag='Y'
+    <select id="getPointFacility" resultType="com.zhitan.basicdata.domain.Device">
+        SELECT ID,code,device_name AS facilityName FROM device where point_flag='Y'
     </select>
 </mapper>

@@ -12,17 +12,18 @@ import com.zhitan.common.utils.StringUtils;
 import com.zhitan.consumptionanalysis.domain.dto.ConsumptionAnalysisDTO;
 import com.zhitan.consumptionanalysis.domain.vo.*;
 import com.zhitan.consumptionanalysis.service.IConsumptionAnalysisService;
-import com.zhitan.dataitem.service.IDataItemService;
+import com.zhitan.energyUsed.service.IEnergyUsedService;
 import com.zhitan.energyIndicators.domain.EnergyIndicators;
 import com.zhitan.energyIndicators.mapper.EnergyIndicatorsMapper;
-import com.zhitan.model.domain.vo.ModelNodeIndexInfo;
+import com.zhitan.model.domain.vo.ModelNodePointInfo;
 import com.zhitan.model.mapper.ModelNodeMapper;
 import com.zhitan.model.service.IModelNodeService;
 import com.zhitan.productoutput.domain.ProductOutput;
 import com.zhitan.productoutput.mapper.ProductOutputMapper;
-import com.zhitan.realtimedata.domain.DataItem;
+import com.zhitan.realtimedata.domain.EnergyUsed;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,22 +35,21 @@ import java.util.stream.Collectors;
 /**
  * description todu
  *
- * @author hmj
- * @date 2024-10-16 18:25
+ * @author zhitan
  */
 @Service
 @AllArgsConstructor
 public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisService {
 
-    private final ModelNodeMapper modelNodeMapper;
+    private ModelNodeMapper modelNodeMapper;
 
-    private final EnergyIndicatorsMapper energyIndicatorsMapper;
+    private EnergyIndicatorsMapper energyIndicatorsMapper;
 
-    private final ProductOutputMapper productOutputMapper;
+    private ProductOutputMapper productOutputMapper;
 
-    private final SysEnergyMapper sysEnergyMapper;
+    private SysEnergyMapper sysEnergyMapper;
 
-    private final IDataItemService dataItemService;
+    private final IEnergyUsedService dataItemService;
 
     private final IModelNodeService modelNodeService;
 
@@ -62,22 +62,26 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
         final String analysisType = dto.getAnalysisType();
         final String nodeId = dto.getNodeId();
         final String energyType = dto.getEnergyType();
-        final Date queryTime = dto.getDataTime();
+        Date queryTime = new Date();
+        if (ObjectUtils.isNotEmpty(dto.getDataTime())){
+            queryTime = dto.getDataTime();
+        }
+
 
         /**
          * 查询点位与用能单元信息
          */
-        List<ModelNodeIndexInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
+        List<ModelNodePointInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
 
-//        if (CollectionUtils.isEmpty(nodeIndexInforList)) {
-//            return consumptionAnalysisVO;
-//        }
-        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
+        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
         Date beginTime;
         Date endTime;
         Date lastTime;
         Date lastEndTime;
-        String queryTimeType = dto.getTimeType();
+        String queryTimeType = TimeType.DAY.name();
+        if (StringUtils.isNotEmpty(dto.getTimeType())) {
+            queryTimeType = dto.getTimeType();
+        }
         String shixuTimeType;
         String timeFormat;
         if (TimeType.DAY.name().equals(queryTimeType)) {
@@ -127,14 +131,14 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             timeFormat = "yyyy-MM";
         }
         // 根据indexId查询dataItem
-        List<DataItem> dataItemList = new ArrayList<>();
-        List<DataItem> lastDataItemList = new ArrayList<>();
+        List<EnergyUsed> energyUsedList = new ArrayList<>();
+        List<EnergyUsed> lastEnergyUsedList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(indexIds)) {
-            dataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
-            lastDataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(lastTime, lastEndTime, shixuTimeType, indexIds);
+            energyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
+            lastEnergyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(lastTime, lastEndTime, shixuTimeType, indexIds);
         }
-        Map<String, List<DataItem>> dataItemMap = dataItemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
-        Map<String, List<DataItem>> lastDataItemMap = lastDataItemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        Map<String, List<EnergyUsed>> dataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        Map<String, List<EnergyUsed>> lastDataItemMap = lastEnergyUsedList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
         //  倍率
         BigDecimal multiple = BigDecimal.valueOf(CommonConst.DIGIT_100);
 
@@ -176,19 +180,19 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             }
 
 
-            final List<DataItem> dataItems = dataItemMap.get(currentTime);
-            final List<DataItem> lastDataItems = lastDataItemMap.get(compareTime);
+            final List<EnergyUsed> energyUseds = dataItemMap.get(currentTime);
+            final List<EnergyUsed> lastEnergyUseds = lastDataItemMap.get(compareTime);
             BigDecimal sum = new BigDecimal(0);
             BigDecimal lastSum = new BigDecimal(0);
-            if (CollectionUtils.isNotEmpty(dataItems)) {
+            if (CollectionUtils.isNotEmpty(energyUseds)) {
                 // 求和
-                sum = BigDecimal.valueOf(dataItems.stream()
-                        .mapToDouble(DataItem::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP);
+                sum = BigDecimal.valueOf(energyUseds.stream()
+                        .mapToDouble(EnergyUsed::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP);
             }
 
-            if (CollectionUtils.isNotEmpty(lastDataItems)) {
-                lastSum = BigDecimal.valueOf(lastDataItems.stream()
-                        .mapToDouble(DataItem::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP);
+            if (CollectionUtils.isNotEmpty(lastEnergyUseds)) {
+                lastSum = BigDecimal.valueOf(lastEnergyUseds.stream()
+                        .mapToDouble(EnergyUsed::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP);
             }
             data.setCurrentValue(sum.doubleValue());
             data.setCompareValue(lastSum.doubleValue());
@@ -258,9 +262,9 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
         final String parentId = dto.getNodeId();
 
         //根据总结点查询
-        final List<ModelNodeIndexInfo> nodeIndexInforList = modelNodeMapper.getModelNodeByParentId(parentId);
+        final List<ModelNodePointInfo> nodeIndexInforList = modelNodeMapper.getModelNodeByParentId(parentId);
 
-        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getEnergyId).distinct().collect(Collectors.toList());
+        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodePointInfo::getEnergyId).distinct().collect(Collectors.toList());
         final LambdaQueryWrapper<SysEnergy> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(CollectionUtils.isNotEmpty(eneryIdList), SysEnergy::getEnersno, eneryIdList);
         final List<SysEnergy> sysEnergies = sysEnergyMapper.selectList(queryWrapper);
@@ -275,12 +279,12 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
         });
 
         // 按照点位进行分组
-        Map<String, List<ModelNodeIndexInfo>> nodeIndexMap = nodeIndexInforList.stream().collect(
-                Collectors.groupingBy(ModelNodeIndexInfo::getNodeId));
+        Map<String, List<ModelNodePointInfo>> nodeIndexMap = nodeIndexInforList.stream().collect(
+                Collectors.groupingBy(ModelNodePointInfo::getNodeId));
 
         // 根据nodeId获取能源类型
         // 所有点位信息
-        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getIndexId).distinct().collect(Collectors.toList());
+        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodePointInfo::getIndexId).distinct().collect(Collectors.toList());
 
         Date beginTime;
         Date endTime;
@@ -303,17 +307,17 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
 
 
         // 根据indexId查询dataItem
-        List<DataItem> dataItemList = new ArrayList<>();
+        List<EnergyUsed> energyUsedList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(indexIds)) {
-            dataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
+            energyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
         }
-        final Map<String, List<DataItem>> dataItemMap = dataItemList.stream().collect(Collectors.groupingBy(DataItem::getIndexId));
+        final Map<String, List<EnergyUsed>> dataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(EnergyUsed::getPointId));
 
         // 根据点位分组，求和
         Map<String, BigDecimal> dataItemTotalMap = new HashMap<>();
         dataItemMap.forEach((key, value) -> {
             BigDecimal sum = BigDecimal.valueOf(value.stream()
-                    .mapToDouble(DataItem::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP);
+                    .mapToDouble(EnergyUsed::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP);
             dataItemTotalMap.put(key, sum);
         });
 
@@ -362,11 +366,11 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
      * @param nodeId
      * @return
      */
-    private List<ModelNodeIndexInfo> listModelNodeIndexIdRelationInfor(String nodeId) {
-        List<ModelNodeIndexInfo> nodeInforList = modelNodeService.listModelNodeIndexIdRelationInforByParentId(nodeId);
+    private List<ModelNodePointInfo> listModelNodeIndexIdRelationInfor(String nodeId) {
+        List<ModelNodePointInfo> nodeInforList = modelNodeService.listModelNodeIndexIdRelationInforByParentId(nodeId);
         // 如果是空存在两种情况，1：id有问题，2：最底层
         if (CollectionUtils.isEmpty(nodeInforList)) {
-            List<ModelNodeIndexInfo> inforList = modelNodeService.getModelNodeIndexIdRelationInforByNodeId(nodeId);
+            List<ModelNodePointInfo> inforList = modelNodeService.getModelNodeIndexIdRelationInforByNodeId(nodeId);
             if (CollectionUtils.isNotEmpty(inforList)) {
                 nodeInforList.addAll(inforList);
             }
@@ -382,7 +386,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
 
         ConsumptionAnalysisVO consumptionAnalysisVO = new ConsumptionAnalysisVO();
 
-        //todo hmj 综合能耗先默认取同比
+        //综合能耗先默认取同比
         final String analysisType = "YOY";
         final String nodeId = dto.getNodeId();
         final String energyType = dto.getEnergyType();
@@ -391,14 +395,11 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
         /**
          * 查询点位与用能单元信息
          */
-        List<ModelNodeIndexInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
+        List<ModelNodePointInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
 
-//        if (CollectionUtils.isEmpty(nodeIndexInforList)) {
-//            return consumptionAnalysisVO;
-//        }
         //修改过滤统计点位
         nodeIndexInforList = nodeIndexInforList.stream().filter(x -> "STATISTIC".equals(x.getIndexType())).collect(Collectors.toList());
-        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getEnergyId).distinct().collect(Collectors.toList());
+        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodePointInfo::getEnergyId).distinct().collect(Collectors.toList());
         final LambdaQueryWrapper<SysEnergy> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(CollectionUtils.isNotEmpty(eneryIdList), SysEnergy::getEnersno, eneryIdList);
         final List<SysEnergy> sysEnergies = sysEnergyMapper.selectList(queryWrapper);
@@ -412,7 +413,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                 indexIdEnergyIdMap.put(indexId, energyId);
             }
         });
-        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
+        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
         Date beginTime;
         Date endTime;
         Date lastTime;
@@ -467,14 +468,14 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             timeFormat = "yyyy-MM";
         }
         // 根据indexId查询dataItem
-        List<DataItem> dataItemList = new ArrayList<>();
-        List<DataItem> lastDataItemList = new ArrayList<>();
+        List<EnergyUsed> energyUsedList = new ArrayList<>();
+        List<EnergyUsed> lastEnergyUsedList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(indexIds)) {
-            dataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
-            lastDataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(lastTime, lastEndTime, shixuTimeType, indexIds);
+            energyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
+            lastEnergyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(lastTime, lastEndTime, shixuTimeType, indexIds);
         }
-        Map<String, List<DataItem>> dataItemMap = dataItemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
-        Map<String, List<DataItem>> lastDataItemMap = lastDataItemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        Map<String, List<EnergyUsed>> dataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        Map<String, List<EnergyUsed>> lastDataItemMap = lastEnergyUsedList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
         //  倍率
         BigDecimal multiple = BigDecimal.valueOf(CommonConst.DIGIT_100);
 
@@ -517,15 +518,15 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             }
 
 
-            final List<DataItem> dataItems = dataItemMap.get(currentTime);
-            final List<DataItem> lastDataItems = lastDataItemMap.get(compareTime);
+            final List<EnergyUsed> energyUseds = dataItemMap.get(currentTime);
+            final List<EnergyUsed> lastEnergyUseds = lastDataItemMap.get(compareTime);
             BigDecimal sum = new BigDecimal(0);
             BigDecimal lastSum = new BigDecimal(0);
-            if (CollectionUtils.isNotEmpty(dataItems)) {
+            if (CollectionUtils.isNotEmpty(energyUseds)) {
                 // 求和
-                for (int i = 0; i < dataItems.size(); i++) {
-                    final DataItem dataItem = dataItems.get(i);
-                    final String indexId = dataItem.getIndexId();
+                for (int i = 0; i < energyUseds.size(); i++) {
+                    final EnergyUsed energyUsed = energyUseds.get(i);
+                    final String indexId = energyUsed.getPointId();
                     final String energyId = indexIdEnergyIdMap.get(indexId);
 
                     final BigDecimal coefficient = energyCoefficientMap.get(energyId);
@@ -533,7 +534,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                         throw new RuntimeException("能源类型" + energyId + "没有配置折标系数，无法计算");
                     }
 
-                    sum = sum.add(new BigDecimal(dataItem.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
+                    sum = sum.add(new BigDecimal(energyUsed.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
                     ;
 //                    if(energyProportionMap.containsKey(energyId)) {
 //                        energyProportionMap.put(energyId,energyProportionMap.get(energyId) + sum.doubleValue());
@@ -544,10 +545,10 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
 
             }
 
-            if (CollectionUtils.isNotEmpty(lastDataItems)) {
-                for (int i = 0; i < lastDataItems.size(); i++) {
-                    final DataItem dataItem = lastDataItems.get(i);
-                    final String indexId = dataItem.getIndexId();
+            if (CollectionUtils.isNotEmpty(lastEnergyUseds)) {
+                for (int i = 0; i < lastEnergyUseds.size(); i++) {
+                    final EnergyUsed energyUsed = lastEnergyUseds.get(i);
+                    final String indexId = energyUsed.getPointId();
                     final String energyId = indexIdEnergyIdMap.get(indexId);
 
                     final BigDecimal coefficient = energyCoefficientMap.get(energyId);
@@ -555,7 +556,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                         throw new RuntimeException("能源类型" + energyId + "没有配置折标系数，无法计算");
                     }
 
-                    lastSum = lastSum.add(new BigDecimal(dataItem.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
+                    lastSum = lastSum.add(new BigDecimal(energyUsed.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
                     ;
                 }
             }
@@ -610,7 +611,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
 
         Double eneryTotal = energyProportionMap.values().stream().mapToDouble(Double::doubleValue).sum();
 
-        Map<String, List<DataItem>> indexDataItemMap = dataItemList.stream().collect(Collectors.groupingBy(DataItem::getIndexId));
+        Map<String, List<EnergyUsed>> indexDataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(EnergyUsed::getPointId));
 
         indexDataItemMap.forEach((indexId, value) -> {
             final String energyId = indexIdEnergyIdMap.get(indexId);
@@ -620,7 +621,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                 throw new RuntimeException("能源类型" + energyId + "没有配置折标系数，无法计算");
             }
 
-            final double sum = value.stream().map(DataItem::getValue).mapToDouble(Double::doubleValue).sum();
+            final double sum = value.stream().map(EnergyUsed::getValue).mapToDouble(Double::doubleValue).sum();
             if (energyProportionMap.containsKey(energyId)) {
                 energyProportionMap.put(energyId, energyProportionMap.get(energyId) + sum * coefficient.doubleValue());
             } else {
@@ -706,21 +707,16 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
     }
 
     public Double getTotalEnergy(ConsumptionAnalysisDTO dto) {
-        //todo hmj 综合能耗先默认取同比
+        //综合能耗先默认取同比
         final String nodeId = dto.getNodeId();
         final String energyType = dto.getEnergyType();
         final Date queryTime = dto.getDataTime();
 
-        /**
-         * 查询点位与用能单元信息
-         */
-        List<ModelNodeIndexInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
+        // 查询点位与用能单元信息
+        List<ModelNodePointInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
 
-//        if (CollectionUtils.isEmpty(nodeIndexInforList)) {
-//            return consumptionAnalysisVO;
-//        }
         nodeIndexInforList = nodeIndexInforList.stream().filter(x -> "STATISTIC".equals(x.getIndexType())).collect(Collectors.toList());
-        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getEnergyId).distinct().collect(Collectors.toList());
+        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodePointInfo::getEnergyId).distinct().collect(Collectors.toList());
         final LambdaQueryWrapper<SysEnergy> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(CollectionUtils.isNotEmpty(eneryIdList), SysEnergy::getEnersno, eneryIdList);
         final List<SysEnergy> sysEnergies = sysEnergyMapper.selectList(queryWrapper);
@@ -733,7 +729,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                 indexIdEnergyIdMap.put(indexId, energyId);
             }
         });
-        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
+        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
         Date beginTime;
         Date endTime;
         String queryTimeType = dto.getTimeType();
@@ -758,23 +754,23 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             timeFormat = "yyyy-MM";
         }
         // 根据indexId查询dataItem
-        List<DataItem> dataItemList = new ArrayList<>();
+        List<EnergyUsed> energyUsedList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(indexIds)) {
-            dataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
+            energyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
         }
-        Map<String, List<DataItem>> dataItemMap = dataItemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        Map<String, List<EnergyUsed>> dataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
 
         Map<String, Double> energyProportionMap = new HashMap<>();
         while (!beginTime.after(endTime)) {
             final String currentTime = DateUtil.format(beginTime, timeFormat);
 
-            final List<DataItem> dataItems = dataItemMap.get(currentTime);
+            final List<EnergyUsed> energyUseds = dataItemMap.get(currentTime);
             BigDecimal sum = new BigDecimal(0);
-            if (CollectionUtils.isNotEmpty(dataItems)) {
+            if (CollectionUtils.isNotEmpty(energyUseds)) {
                 // 求和
-                for (int i = 0; i < dataItems.size(); i++) {
-                    final DataItem dataItem = dataItems.get(i);
-                    final String indexId = dataItem.getIndexId();
+                for (int i = 0; i < energyUseds.size(); i++) {
+                    final EnergyUsed energyUsed = energyUseds.get(i);
+                    final String indexId = energyUsed.getPointId();
                     final String energyId = indexIdEnergyIdMap.get(indexId);
 
                     final BigDecimal coefficient = energyCoefficientMap.get(energyId);
@@ -782,7 +778,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                         throw new RuntimeException("能源类型" + energyId + "没有配置折标系数，无法计算");
                     }
 
-                    sum = sum.add(new BigDecimal(dataItem.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
+                    sum = sum.add(new BigDecimal(energyUsed.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
                     ;
 //                    if(energyProportionMap.containsKey(energyId)) {
 //                        energyProportionMap.put(energyId,energyProportionMap.get(energyId) + sum.doubleValue());
@@ -807,7 +803,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
         }
 
 
-        Map<String, List<DataItem>> indexDataItemMap = dataItemList.stream().collect(Collectors.groupingBy(DataItem::getIndexId));
+        Map<String, List<EnergyUsed>> indexDataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(EnergyUsed::getPointId));
 
         indexDataItemMap.forEach((indexId, value) -> {
             final String energyId = indexIdEnergyIdMap.get(indexId);
@@ -817,7 +813,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                 throw new RuntimeException("能源类型" + energyId + "没有配置折标系数，无法计算");
             }
 
-            final double sum = value.stream().map(DataItem::getValue).mapToDouble(Double::doubleValue).sum();
+            final double sum = value.stream().map(EnergyUsed::getValue).mapToDouble(Double::doubleValue).sum();
             if (energyProportionMap.containsKey(energyId)) {
                 energyProportionMap.put(energyId, energyProportionMap.get(energyId) + sum * coefficient.doubleValue());
             } else {
@@ -831,14 +827,12 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
     @Override
     public List<RankingEnergyData> getEnergyRanking(ConsumptionAnalysisDTO dto) {
         List<RankingEnergyData> energyDataList = new ArrayList<>();
-        //todo hmj 综合能耗先默认取同比
+        //综合能耗先默认取同比
         final String nodeId = dto.getNodeId();
         final Date queryTime = dto.getDataTime();
 
-        /**
-         * 查询点位与用能单元信息
-         */
-        List<ModelNodeIndexInfo> nodeIndexInforList = modelNodeMapper.getModelNodeByParentId(nodeId);
+        // 查询点位与用能单元信息
+        List<ModelNodePointInfo> nodeIndexInforList = modelNodeMapper.getModelNodeByParentId(nodeId);
         final Map<String, String> nodeNameMap = new HashMap<>();
         nodeIndexInforList.forEach(n -> {
             final String id = n.getNodeId();
@@ -848,9 +842,9 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             }
         });
         // 按照点位进行分组
-        Map<String, List<ModelNodeIndexInfo>> nodeIndexMap = nodeIndexInforList.stream().collect(
-                Collectors.groupingBy(ModelNodeIndexInfo::getNodeId));
-        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getEnergyId).distinct().collect(Collectors.toList());
+        Map<String, List<ModelNodePointInfo>> nodeIndexMap = nodeIndexInforList.stream().collect(
+                Collectors.groupingBy(ModelNodePointInfo::getNodeId));
+        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodePointInfo::getEnergyId).distinct().collect(Collectors.toList());
         final LambdaQueryWrapper<SysEnergy> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(CollectionUtils.isNotEmpty(eneryIdList), SysEnergy::getEnersno, eneryIdList);
         final List<SysEnergy> sysEnergies = sysEnergyMapper.selectList(queryWrapper);
@@ -865,7 +859,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                 indexIdEnergyIdMap.put(indexId, energyId);
             }
         });
-        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
+        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
         Date beginTime;
         Date endTime;
         String queryTimeType = dto.getTimeType();
@@ -886,25 +880,25 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             shixuTimeType = TimeType.MONTH.name();
         }
         // 根据indexId查询dataItem
-        List<DataItem> dataItemList = new ArrayList<>();
+        List<EnergyUsed> energyUsedList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(indexIds)) {
-            dataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
+            energyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
         }
-        Map<String, List<DataItem>> dataItemMap = dataItemList.stream().collect(Collectors.groupingBy(DataItem::getIndexId));
+        Map<String, List<EnergyUsed>> dataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(EnergyUsed::getPointId));
 
         Map<String, BigDecimal> resultMap = new HashMap<>();
         nodeIndexMap.forEach((key, value) -> {
             // 找出indexIds
-            List<String> indexIdList = value.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
+            List<String> indexIdList = value.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
 
             indexIdList.forEach(indexId -> {
-                final List<DataItem> dataItems = dataItemMap.get(indexId);
+                final List<EnergyUsed> energyUseds = dataItemMap.get(indexId);
                 final String energyId = indexIdEnergyIdMap.get(indexId);
                 final BigDecimal coefficient = energyCoefficientMap.get(energyId);
 
-                if (CollectionUtils.isNotEmpty(dataItems)) {
-                    BigDecimal sum = BigDecimal.valueOf(dataItems.stream()
-                            .mapToDouble(DataItem::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP).multiply(coefficient);
+                if (CollectionUtils.isNotEmpty(energyUseds)) {
+                    BigDecimal sum = BigDecimal.valueOf(energyUseds.stream()
+                            .mapToDouble(EnergyUsed::getValue).sum()).setScale(CommonConst.DIGIT_2, RoundingMode.HALF_UP).multiply(coefficient);
 
                     if (resultMap.containsKey(key)) {
                         resultMap.put(key, resultMap.get(key).add(sum));
@@ -994,9 +988,9 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
         /**
          * 查询点位与用能单元信息
          */
-        List<ModelNodeIndexInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
+        List<ModelNodePointInfo> nodeIndexInforList = modelNodeMapper.getModelNodeIndexIdByNodeId(nodeId, energyType);
 
-        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getEnergyId).distinct().collect(Collectors.toList());
+        final List<String> eneryIdList = nodeIndexInforList.stream().map(ModelNodePointInfo::getEnergyId).distinct().collect(Collectors.toList());
         final LambdaQueryWrapper<SysEnergy> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(CollectionUtils.isNotEmpty(eneryIdList), SysEnergy::getEnersno, eneryIdList);
         final List<SysEnergy> sysEnergies = sysEnergyMapper.selectList(queryWrapper);
@@ -1009,7 +1003,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                 indexIdEnergyIdMap.put(indexId, energyId);
             }
         });
-        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodeIndexInfo::getIndexId).collect(Collectors.toList());
+        List<String> indexIds = nodeIndexInforList.stream().map(ModelNodePointInfo::getIndexId).collect(Collectors.toList());
         Date beginTime;
         Date endTime;
         String queryTimeType = dto.getTimeType();
@@ -1036,11 +1030,11 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
 
 
         // 根据indexId查询dataItem
-        List<DataItem> dataItemList = new ArrayList<>();
+        List<EnergyUsed> energyUsedList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(indexIds)) {
-            dataItemList = dataItemService.getDataItemTimeRangeInforByIndexIds(beginTime, endTime, shixuTimeType, indexIds);
+            energyUsedList = dataItemService.listEnergyUsedTimeRangeInfoByPointIds(beginTime, endTime, shixuTimeType, indexIds);
         }
-        Map<String, List<DataItem>> dataItemMap = dataItemList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
+        Map<String, List<EnergyUsed>> dataItemMap = energyUsedList.stream().collect(Collectors.groupingBy(li -> DateUtil.format(li.getDataTime(), timeFormat)));
         Map<String, List<ProductOutput>> prodCountMap = new HashMap<>();
         while (!beginTime.after(endTime)) {
             //查询开始时间和结束时间之间的产量
@@ -1054,13 +1048,13 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
             ConsumptionAnalysisData data = new ConsumptionAnalysisData();
             final String currentTime = DateUtil.format(beginTime, timeFormat);
 
-            final List<DataItem> dataItems = dataItemMap.get(currentTime);
+            final List<EnergyUsed> energyUseds = dataItemMap.get(currentTime);
             BigDecimal sum = new BigDecimal(0);
-            if (CollectionUtils.isNotEmpty(dataItems)) {
+            if (CollectionUtils.isNotEmpty(energyUseds)) {
                 // 求和
-                for (int i = 0; i < dataItems.size(); i++) {
-                    final DataItem dataItem = dataItems.get(i);
-                    final String indexId = dataItem.getIndexId();
+                for (int i = 0; i < energyUseds.size(); i++) {
+                    final EnergyUsed energyUsed = energyUseds.get(i);
+                    final String indexId = energyUsed.getPointId();
                     final String energyId = indexIdEnergyIdMap.get(indexId);
 
                     final BigDecimal coefficient = energyCoefficientMap.get(energyId);
@@ -1068,7 +1062,7 @@ public class ConsumptionAnalysisServiceImpl implements IConsumptionAnalysisServi
                         throw new RuntimeException("能源类型" + energyId + "没有配置折标系数，无法计算");
                     }
 
-                    sum = sum.add(new BigDecimal(dataItem.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
+                    sum = sum.add(new BigDecimal(energyUsed.getValue()).multiply(coefficient)).setScale(2, RoundingMode.HALF_UP);
                     ;
                 }
 

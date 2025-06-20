@@ -12,6 +12,8 @@ import com.zhitan.knowledgeBase.domain.vo.KnowledgeBasePageVO;
 import com.zhitan.knowledgeBase.service.IKnowledgeBaseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,17 +22,14 @@ import javax.annotation.Resource;
 /**
  * 知识库(KnowledgeBase)表控制层
  *
- * @author makejava
- * @since 2025-01-10 15:05:26
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
 @Api(tags = "知识库管理")
 @RequestMapping("/knowledgeBase")
 public class KnowledgeBaseController extends BaseController {
-    /**
-     * 服务对象
-     */
-    @Resource
     private IKnowledgeBaseService IKnowledgeBaseService;
 
     /**

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.comprehensivestatistics.mapper.ComprehensiveStatisticsMapper">
     <resultMap id="dataItemMap" type="com.zhitan.comprehensivestatistics.domain.ComprehensiveStatistics">
-        <id column="index_id" property="indexId"/>
+        <id column="index_id" property="pointId"/>
         <id column="time_code" property="timeCode"/>
         <id column="index_code" property="indexCode"/>
         <id column="index_name" property="indexName"/>
@@ -19,7 +19,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result column="update_time" property="updateTime"/>
         <result column="remark" property="remark"/>
         <result column="name" property="name"/>
-        <result column="index_type" property="indexType"/>
+        <result column="point_type" property="indexType"/>
         <result column="facility_name" property="facilityName"/>
     </resultMap>
     <resultMap id="comprehensiveMap" type="com.zhitan.comprehensivestatistics.domain.Comprehensive">
@@ -60,7 +60,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="itemHead">
-        SELECT di.index_id,
+        SELECT di.point_id,
                di.time_code,
                di.time_type,
                di.begin_time,
@@ -70,52 +70,58 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                di.quality,
                di.create_time,
                di.update_time,
-               ci.code AS "index_code",
-               ci.name AS "index_name",
-               ci.unit_id AS unitId,
-               f.facility_name AS facilityName
-        FROM data_item di
-               LEFT JOIN energy_index ci ON di.index_id = ci.index_id
-               LEFT JOIN facility_archives f ON f."id"=ci.equipment
+               ci.code       AS "index_code",
+               ci.name       AS "index_name",
+               ci.unit_id    AS unitId,
+               f.device_name AS deviceName
+        FROM energy_used di
+                 LEFT JOIN energy_point ci ON di.point_id = ci.point_id
+                 LEFT JOIN device f ON f."id" = ci.equipment
     </sql>
     <select id="getStatisticsEnergy" resultType="com.zhitan.basicdata.domain.SysEnergy">
-        select enerid, enersno, enername,( SELECT d.dict_label FROM sys_dict_data d WHERE dict_type = 'sys_unit' AND d.dict_code	= e.muid) muidName
+        select enerid,
+               enersno,
+               enername,
+               (SELECT d.dict_label FROM sys_dict_data d WHERE dict_type = 'sys_unit' AND d.dict_code = e.muid) muidName
         from sys_energy e
-               left join node_energy ne on e.enerid = ne.energy_id
+                 left join node_energy ne on e.enerid = ne.energy_id
         where ne.node_id = #{nodeId};
     </select>
     <select id="getDatasByIndex" resultMap="dataItemMap">
         SELECT
-            e.NAME,
-            e.index_code,
-            di.index_id,
-            di.time_code,
-            di.time_type,
-            di.begin_time,
-            di.end_time,
-            di.data_time,
-            di.VALUE,
-            di.quality,
-            di.create_time,
-            di.update_time
+        e.NAME,
+        e.index_code,
+        di.point_id,
+        di.time_code,
+        di.time_type,
+        di.begin_time,
+        di.end_time,
+        di.data_time,
+        di.VALUE,
+        di.quality,
+        di.create_time,
+        di.update_time
         FROM
-            data_item di
-            LEFT JOIN energy_statistics e ON di.index_id = e.index_id
+        energy_used di
+        LEFT JOIN energy_statistics e ON di.point_id = e.index_id
         where di.time_code = #{timeCode}
-            AND di.index_id in
-            <foreach item="indexId" index="index" collection="indexIds" open="(" separator="," close=")">
-                #{indexId}
-            </foreach>
+        AND di.point_id in
+        <foreach item="indexId" index="index" collection="indexIds" open="(" separator="," close=")">
+            #{indexId}
+        </foreach>
     </select>
     <select id="getEnergyByIndex" resultMap="dataItemMap">
-       select "name",index_id from  energy_statistics where index_type=#{indexType}
+        select "name", index_id
+        from energy_statistics
+        where index_type = #{pointType}
     </select>
-    <select id="getFacilityArchives" resultType="com.zhitan.basicdata.domain.FacilityArchives">
-        SELECT ID,code,facility_name AS facilityName FROM facility_archives
+    <select id="getFacilityArchives" resultType="com.zhitan.basicdata.domain.Device">
+        SELECT ID, code, device_name AS deviceName
+        FROM device
     </select>
 
     <select id="getDatasIndex" resultMap="dataItemMap">
-        SELECT di.index_id,
+        SELECT di.point_id,
         di.time_code,
         di.time_type,
         di.begin_time,
@@ -128,45 +134,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ci.code AS "index_code",
         ci.name AS "index_name",
         ci.unit_id AS unitId,
-        f.facility_name AS "facility_name"
-        FROM data_item di
-        LEFT JOIN energy_index ci ON di.index_id = ci.index_id
-        LEFT JOIN facility_archives f ON f."id"=ci.equipment
+        f.device_name AS "facility_name"
+        FROM energy_used di
+        LEFT JOIN meter_point ci ON di.point_id = ci.point_id
+        LEFT JOIN device f ON f."id"=ci.equipment
         where di.time_code = #{timeCode}
-        AND di.index_id in
+        AND di.point_id in
         <foreach item="indexId" index="index" collection="indexIds"
                  open="(" separator="," close=")">
             #{indexId}
         </foreach>
-         and ci.equipment is not null
+        and ci.equipment is not null
         ORDER BY di."value" desc
     </select>
 
     <select id="getDatasByList" resultMap="dataItemMap">
         SELECT
-            e.NAME,
-            e.index_code,
-            di.index_id,
-            di.time_code,
-            di.time_type,
-            di.begin_time,
-            di.end_time,
-            di.data_time,
-            di.VALUE,
-            di.quality,
-            di.create_time,
-            di.update_time
+        e.NAME,
+        e.index_code,
+        di.point_id,
+        di.time_code,
+        di.time_type,
+        di.begin_time,
+        di.end_time,
+        di.data_time,
+        di.VALUE,
+        di.quality,
+        di.create_time,
+        di.update_time
         FROM
-            data_item di
-            LEFT JOIN energy_statistics e ON di.index_id = e.index_id
+        energy_used di
+        LEFT JOIN energy_statistics e ON di.point_id = e.index_id
         where di.time_type = #{timeType}
-            AND di.data_time &gt;= #{beginTime}
-            AND di.data_time &lt; #{endTime}
-            AND di.index_id in
-            <foreach item="indexId" index="index" collection="indexIds"
-                     open="(" separator="," close=")">
-                #{indexId}
-            </foreach>
+        AND di.data_time &gt;= #{beginTime}
+        AND di.data_time &lt; #{endTime}
+        AND di.index_id in
+        <foreach item="indexId" index="index" collection="indexIds"
+                 open="(" separator="," close=")">
+            #{indexId}
+        </foreach>
         ORDER BY di."value" desc
     </select>
 </mapper>

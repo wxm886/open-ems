@@ -9,6 +9,8 @@ import com.zhitan.processenergy.domain.YearProcessEnergy;
 import com.zhitan.processenergy.mapper.YearProcessEnergyMapper;
 import com.zhitan.processenergy.service.IYearProcessEnergyService;
 import com.zhitan.realtimedata.domain.dto.DataItemQueryDTO;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +24,11 @@ import java.util.List;
 /**
  *重点设备能耗统计 年
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class YearProcessEnergyServiceImpl implements IYearProcessEnergyService {
 
     @Resource

@@ -39,27 +39,20 @@ import java.util.stream.Collectors;
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService {
     private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
-
-    @Resource
-    private SysUserMapper userMapper;
-
-    @Resource
-    private SysRoleMapper roleMapper;
-
-    @Resource
-    private SysPostMapper postMapper;
-
-    @Resource
-    private SysUserRoleMapper userRoleMapper;
-
-    @Resource
-    private SysUserPostMapper userPostMapper;
-
-    @Resource
-    private ISysConfigService configService;
-
     @Resource
     protected Validator validator;
+    @Resource
+    private SysUserMapper userMapper;
+    @Resource
+    private SysRoleMapper roleMapper;
+    @Resource
+    private SysPostMapper postMapper;
+    @Resource
+    private SysUserRoleMapper userRoleMapper;
+    @Resource
+    private SysUserPostMapper userPostMapper;
+    @Resource
+    private ISysConfigService configService;
 
     /**
      * 根据条件分页查询用户列表
@@ -488,25 +481,27 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         return successMsg.toString();
     }
+
     @Override
     public Page<SysUser> selectUserPage(SysUser user, Long pageNum, Long pageSize) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotEmpty(user.getUserName()),SysUser::getUserName,user.getUserName());
-        queryWrapper.like(StringUtils.isNotEmpty(user.getPhoneNumber()),SysUser::getPhoneNumber,user.getPhoneNumber());
-        queryWrapper.eq(StringUtils.isNotEmpty(user.getStatus()),SysUser::getStatus,user.getStatus());
-        if(user.getParams().containsKey("beginTime")) {
+        queryWrapper.like(StringUtils.isNotEmpty(user.getUserName()), SysUser::getUserName, user.getUserName());
+        queryWrapper.like(StringUtils.isNotEmpty(user.getPhoneNumber()), SysUser::getPhoneNumber, user.getPhoneNumber());
+        queryWrapper.eq(StringUtils.isNotEmpty(user.getStatus()), SysUser::getStatus, user.getStatus());
+        queryWrapper.orderByDesc(SysUser::getCreateTime);
+        if (user.getParams().containsKey("beginTime")) {
             queryWrapper.between(SysUser::getCreateTime,
                     DateUtils.parseDate(user.getParams().get("beginTime")),
                     DateUtils.parseDate(user.getParams().get("endTime")));
         }
-        final Page<SysUser> page = userMapper.selectPage(new Page<SysUser>(pageNum, pageSize),queryWrapper);
+        final Page<SysUser> page = userMapper.selectPage(new Page<SysUser>(pageNum, pageSize), queryWrapper);
         return page;
     }
 
     @Override
     public Long checkThirdUserExist(SysUser user) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(SysUser::getUserName,user.getUserName());
+        queryWrapper.eq(SysUser::getUserName, user.getUserName());
         return userMapper.selectCount(queryWrapper);
     }
 }

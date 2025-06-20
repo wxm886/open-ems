@@ -11,6 +11,8 @@ import com.zhitan.saving.domain.vo.EnergySavingProgramVO;
 import com.zhitan.saving.service.IEnergySavingProgramService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,14 +22,14 @@ import javax.annotation.Resource;
  * 节能项目管理
  * Controller
  *
- * @author ZhiTan
- * @date 2024-12-26
+ * @author zhitan
  */
+@Slf4j
 @RestController
-@RequestMapping("/energySavingProject")
+@AllArgsConstructor
 @Api(tags = "节能项目管理")
+@RequestMapping("/energySavingProject")
 public class EnergySavingProgramController extends BaseController {
-    @Resource
     private IEnergySavingProgramService energySavingProgramService;
 
     /**

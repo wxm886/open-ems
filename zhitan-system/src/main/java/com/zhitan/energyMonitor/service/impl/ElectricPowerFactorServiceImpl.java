@@ -10,9 +10,10 @@ import com.zhitan.energyMonitor.domain.vo.ElectricPowerFactorDetail;
 import com.zhitan.energyMonitor.domain.vo.ElectricPowerFactorItem;
 import com.zhitan.energyMonitor.domain.vo.ElectricPowerFactorVO;
 import com.zhitan.energyMonitor.service.IElectricPowerFactorService;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.realtimedata.domain.TagValue;
 import com.zhitan.realtimedata.service.RealtimeDatabaseService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,19 +23,16 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Description: sensor_alarm_item
- * @Author: jeecg-boot
- * @Date: 2022-04-19
- * @Version: V1.0
+ * 电表功率因数服务实现类
  */
 @Slf4j
+@AllArgsConstructor
 @Service
 public class ElectricPowerFactorServiceImpl implements IElectricPowerFactorService {
-    @Autowired
     private RealtimeDatabaseService realtimeDatabaseService;
 
     @Override
-    public ElectricPowerFactorVO list(String timeCode, EnergyIndex energyIndex) {
+    public ElectricPowerFactorVO list(String timeCode, MeterPoint meterPoint) {
         ElectricPowerFactorVO vo = new ElectricPowerFactorVO();
         List<ElectricPowerFactorItem> itemList = new ArrayList<>();
         ElectricPowerFactorDetail detail = new ElectricPowerFactorDetail();
@@ -65,7 +63,7 @@ public class ElectricPowerFactorServiceImpl implements IElectricPowerFactorServi
             }
             TagValue tagValue = new TagValue();
             try {
-                TagValue retrieve = realtimeDatabaseService.retrieve(energyIndex.getCode(), date);
+                TagValue retrieve = realtimeDatabaseService.retrieve(meterPoint.getCode(), date);
                 if (ObjectUtil.isNotEmpty(retrieve)) {
                     tagValue = retrieve;
                 }

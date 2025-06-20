@@ -5,6 +5,8 @@ import com.zhitan.framework.security.filter.JwtAuthenticationTokenFilter;
 import com.zhitan.framework.security.handle.AuthenticationEntryPointImpl;
 import com.zhitan.framework.security.handle.LogoutSuccessHandlerImpl;
 import com.zhitan.framework.security.single.SingleAuthenticationProvider;
+import com.zhitan.framework.security.single.SmsCodeAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +35,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * 自定义用户认证逻辑
      */
     @Resource
+    @Qualifier("userDetails")
     private UserDetailsService userDetailsService;
+
+    /**
+     * 自定义用户认证逻辑（验证码）
+     */
+    @Resource
+    @Qualifier("userDetailsByPhoneNumber")
+    private UserDetailsService smsUserDetailsService;
 
     /**
      * 认证失败处理类
@@ -115,7 +125,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 过滤请求
                 .authorizeRequests()
                 // 对于登录login 注册register 验证码captchaImage 允许匿名访问
-                .antMatchers("/login", "/register", "/captchaImage").permitAll()
+                .antMatchers("/login", "/register", "/captchaImage", "/sms/send", "/loginWithSms", "/loginSSO").permitAll()
                 // 静态资源，可匿名访问
                 .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**").permitAll()
                 .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
@@ -147,5 +157,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
         auth.authenticationProvider(singleAuthenticationProvider);
+        // 验证码 provider
+        auth.authenticationProvider(new SmsCodeAuthenticationProvider(smsUserDetailsService));
     }
 }

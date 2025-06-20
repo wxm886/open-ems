@@ -9,15 +9,15 @@ import com.zhitan.carbonemission.domain.CarbonEmission;
 import com.zhitan.common.constant.CommonConst;
 import com.zhitan.common.constant.TimeTypeConst;
 import com.zhitan.common.utils.StringUtils;
-import com.zhitan.dataitem.mapper.DataItemMapper;
+import com.zhitan.energyUsed.mapper.EnergyUsedMapper;
 import com.zhitan.model.domain.ModelNode;
-import com.zhitan.model.domain.NodeIndex;
+import com.zhitan.model.domain.NodePoint;
 import com.zhitan.model.mapper.ModelNodeMapper;
-import com.zhitan.model.mapper.NodeIndexMapper;
-import com.zhitan.peakvalley.domain.ElectricityDataItem;
-import com.zhitan.peakvalley.mapper.PeakValleyMapper;
-import com.zhitan.statisticalAnalysis.common.DateTimeUtil;
+import com.zhitan.model.mapper.NodePointMapper;
+import com.zhitan.peakvalley.mapper.EnergyUsedElectricityMapper;
+import com.zhitan.common.constant.DateTimeUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import com.zhitan.statisticalAnalysis.domain.vo.*;
 import com.zhitan.statisticalAnalysis.service.IEnergyConsumeDataService;
@@ -30,19 +30,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description: TODO
- * @author: yxw
- * @date: 2022年04月12日 14:15
- */
+@Slf4j
 @Service
 @AllArgsConstructor
 public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
 
-    private DataItemMapper dataItemMapper;
+    private EnergyUsedMapper energyUsedMapper;
     private ModelNodeMapper modelNodeMapper;
-    private NodeIndexMapper nodeIndexMapper;
-    private PeakValleyMapper peakValleyMapper;
+    private NodePointMapper nodePointMapper;
+    private EnergyUsedElectricityMapper peakValleyMapper;
     private SysEnergyMapper sysEnergyMapper;
 
     /**
@@ -76,8 +72,8 @@ public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
         }
         ModelNode modelNodeInfo = modelNodes.stream().findFirst().get();
         //点位信息
-        List<NodeIndex> nodeIndices = nodeIndexMapper.selectList(Wrappers.<NodeIndex>lambdaQuery()
-                .eq(NodeIndex::getNodeId, modelNodeInfo.getNodeId()));
+        List<NodePoint> nodeIndices = nodePointMapper.selectList(Wrappers.<NodePoint>lambdaQuery()
+                .eq(NodePoint::getNodeId, modelNodeInfo.getNodeId()));
         if (nodeIndices.isEmpty()) {
             throw new RuntimeException("未查询到点位信息");
         }
@@ -124,19 +120,19 @@ public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
      * @return
      */
     private BigDecimal getEnergyUnitCostTrendAnalysisValueInfo(String timeType, Date bsTime, Date endTime, BigDecimal totalCost,
-                                                               List<NodeIndex> nodeIndices, String nodeId, SysEnergy sysEnergyInfo,
+                                                               List<NodePoint> nodeIndices, String nodeId, SysEnergy sysEnergyInfo,
                                                                CostTrendEnergyTypeItem item) {
         BigDecimal costValue = BigDecimal.ZERO;
         BigDecimal accumulationValue = BigDecimal.ZERO;
         //电：只有HOUR数据有效；其他能源类型：HOUR、DAY有数据
         switch (sysEnergyInfo.getEnersno()) {
             case "electric":
-                List<ElectricityDataItem> electricityDataItems = peakValleyMapper.getDataStatistics(nodeIndices.stream().map(NodeIndex::getIndexId).collect(Collectors.toSet()), bsTime, endTime, TimeTypeConst.TIME_TYPE_HOUR);
-                costValue = electricityDataItems.stream().map(ElectricityDataItem::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-                accumulationValue = electricityDataItems.stream().map(ElectricityDataItem::getElectricity).reduce(BigDecimal.ZERO, BigDecimal::add);
+                List<com.zhitan.peakvalley.domain.EnergyUsedElectricity> energyUsedElectricities = peakValleyMapper.getDataStatistics(nodeIndices.stream().map(NodePoint::getPointId).collect(Collectors.toSet()), bsTime, endTime, TimeTypeConst.TIME_TYPE_HOUR);
+                costValue = energyUsedElectricities.stream().map(com.zhitan.peakvalley.domain.EnergyUsedElectricity::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+                accumulationValue = energyUsedElectricities.stream().map(com.zhitan.peakvalley.domain.EnergyUsedElectricity::getElectricity).reduce(BigDecimal.ZERO, BigDecimal::add);
                 break;
             default:
-                accumulationValue = dataItemMapper.getDataItemTimeRangeValueByNodeId(bsTime, endTime, TimeTypeConst.TIME_TYPE_DAY, nodeId, sysEnergyInfo.getEnersno());
+                accumulationValue = energyUsedMapper.getDataItemTimeRangeValueByNodeId(bsTime, endTime, TimeTypeConst.TIME_TYPE_DAY, nodeId, sysEnergyInfo.getEnersno());
                 costValue = accumulationValue.multiply(sysEnergyInfo.getPrice());
                 break;
         }
@@ -186,9 +182,9 @@ public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
             List<EnergyConsumeVO> energyConsumeVOList = new ArrayList<>();
             switch (sysEnergyInfo.getEnersno()) {
                 case "electric":
-                    List<ElectricityDataItem> electricityDataItems = peakValleyMapper.getCostTrends(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
-                    if (!electricityDataItems.isEmpty()) {
-                        electricityDataItems.forEach(electricityDataItem -> {
+                    List<com.zhitan.peakvalley.domain.EnergyUsedElectricity> energyUsedElectricities = peakValleyMapper.getCostTrends(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
+                    if (!energyUsedElectricities.isEmpty()) {
+                        energyUsedElectricities.forEach(electricityDataItem -> {
                             EnergyConsumeVO temp = new EnergyConsumeVO();
                             temp.setDataTime(electricityDataItem.getDataTime());
                             temp.setCostValue(electricityDataItem.getCost());
@@ -201,7 +197,7 @@ public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
                     if (timeType.equals(TimeTypeConst.TIME_TYPE_MONTH) || timeType.equals(TimeTypeConst.TIME_TYPE_YEAR)) {
                         queryTimeType = TimeTypeConst.TIME_TYPE_DAY;
                     }
-                    List<CarbonEmission> dataItems = dataItemMapper.getMiddleCarbonEmission(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
+                    List<CarbonEmission> dataItems = energyUsedMapper.getMiddleCarbonEmission(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
                     if (!dataItems.isEmpty()) {
                         dataItems.forEach(electricityDataItem -> {
                             EnergyConsumeVO temp = new EnergyConsumeVO();
@@ -363,13 +359,13 @@ public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
         List<EnergyConsumeVO> energyConsumeVOList = new ArrayList<>();
         switch (sysEnergyInfo.getEnersno()) {
             case "electric":
-                List<ElectricityDataItem> electricityDataItems = peakValleyMapper.getCostTrends(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
-                List<ElectricityDataItem> lastDataItemList = peakValleyMapper.getCostTrends(lastBeginTime, lastEndTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
+                List<com.zhitan.peakvalley.domain.EnergyUsedElectricity> energyUsedElectricities = peakValleyMapper.getCostTrends(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
+                List<com.zhitan.peakvalley.domain.EnergyUsedElectricity> lastDataItemList = peakValleyMapper.getCostTrends(lastBeginTime, lastEndTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
                 if (!lastDataItemList.isEmpty()) {
-                    electricityDataItems.addAll(lastDataItemList);
+                    energyUsedElectricities.addAll(lastDataItemList);
                 }
-                if (!electricityDataItems.isEmpty()) {
-                    electricityDataItems.forEach(electricityDataItem -> {
+                if (!energyUsedElectricities.isEmpty()) {
+                    energyUsedElectricities.forEach(electricityDataItem -> {
                         EnergyConsumeVO temp = new EnergyConsumeVO();
                         temp.setDataTime(electricityDataItem.getDataTime());
                         temp.setAccumulationValue(electricityDataItem.getElectricity());
@@ -381,8 +377,8 @@ public class EnergyConsumeDataServiceImpl implements IEnergyConsumeDataService {
                 if (timeType.equals(TimeTypeConst.TIME_TYPE_MONTH) || timeType.equals(TimeTypeConst.TIME_TYPE_YEAR)) {
                     queryTimeType = TimeTypeConst.TIME_TYPE_DAY;
                 }
-                List<CarbonEmission> dataItems = dataItemMapper.getMiddleCarbonEmission(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
-                List<CarbonEmission> lastDataItems = dataItemMapper.getMiddleCarbonEmission(lastBeginTime, lastEndTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
+                List<CarbonEmission> dataItems = energyUsedMapper.getMiddleCarbonEmission(startTime, endTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
+                List<CarbonEmission> lastDataItems = energyUsedMapper.getMiddleCarbonEmission(lastBeginTime, lastEndTime, queryTimeType, nodeId, sysEnergyInfo.getEnersno());
                 if (!lastDataItems.isEmpty()) {
                     dataItems.addAll(lastDataItems);
                 }

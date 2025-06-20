@@ -9,6 +9,8 @@ import com.zhitan.common.enums.RetrievalModes;
 import com.zhitan.realtimedata.data.influxdb.InfluxDBRepository;
 import com.zhitan.realtimedata.domain.TagValue;
 import com.zhitan.realtimedata.service.RealtimeDatabaseService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
@@ -19,16 +21,12 @@ import java.util.*;
 /**
  * 实时数据库取数服务实现类.
  */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class RealtimeDatabaseServiceImpl implements RealtimeDatabaseService {
 
     private final InfluxDBRepository repository;
-
-
-    public RealtimeDatabaseServiceImpl(InfluxDBRepository repository
-    ) {
-        this.repository = repository;
-    }
 
     /**
      * 获取单个测点的实时数据.

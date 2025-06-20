@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author 范新富 实时数据库访问接口.
+ * @author zhitan 实时数据库访问接口.
  */
 public interface RealtimeDatabaseService {
 

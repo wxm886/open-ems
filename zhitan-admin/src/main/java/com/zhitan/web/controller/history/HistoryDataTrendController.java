@@ -1,8 +1,6 @@
 package com.zhitan.web.controller.history;
 
 import cn.hutool.core.date.DateUtil;
-import com.zhitan.basicdata.domain.MeterImplement;
-import com.zhitan.basicdata.services.IMeterImplementService;
 import com.zhitan.common.annotation.Log;
 import com.zhitan.common.constant.CommonConst;
 import com.zhitan.common.constant.TimeTypeConst;
@@ -17,14 +15,16 @@ import com.zhitan.common.utils.poi.ExcelUtil;
 import com.zhitan.history.domain.dto.HistoricalDataDTO;
 import com.zhitan.history.domain.vo.HistoricalDataExcel;
 import com.zhitan.history.domain.vo.HistoricalDataVO;
-import com.zhitan.model.domain.EnergyIndex;
-import com.zhitan.model.service.IEnergyIndexService;
+import com.zhitan.meter.domain.Meter;
+import com.zhitan.meter.services.IMeterService;
+import com.zhitan.model.domain.MeterPoint;
+import com.zhitan.model.service.IMeterPointService;
 import com.zhitan.realtimedata.domain.TagValue;
 import com.zhitan.realtimedata.service.RealtimeDatabaseService;
 import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,37 +38,24 @@ import java.util.List;
 /**
  * 历史数据趋势Controller
  *
- * @author sys
- * @date 2020-03-30
+ * @author zhitan
  */
-@Api(tags = "历史数据趋势")
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "历史数据趋势")
 @RequestMapping("/dataMonitoring/historyDataTrend")
 public class HistoryDataTrendController extends BaseController {
-    @Autowired
-    private final IEnergyIndexService energyIndexService;
-
-    @Autowired
-    private final IMeterImplementService meterImplementService;
-
-    @Autowired
-    private final RealtimeDatabaseService realtimeDatabaseService;
-
-
-    public HistoryDataTrendController(IEnergyIndexService energyIndexService,
-                                      IMeterImplementService meterImplementService,
-                                      RealtimeDatabaseService realtimeDatabaseService) {
-        this.energyIndexService = energyIndexService;
-        this.meterImplementService = meterImplementService;
-        this.realtimeDatabaseService = realtimeDatabaseService;
-    }
+    private IMeterPointService meterPointService;
+    private IMeterService meterImplementService;
+    private RealtimeDatabaseService realtimeDatabaseService;
 
 
     @Log(title = "获取模型节点关联采集指标", businessType = BusinessType.UPDATE)
     @GetMapping("/energyIndex/list")
-    public AjaxResult getSettingIndex(EnergyIndex energyIndex) {
+    public AjaxResult getSettingIndex(MeterPoint meterPoint) {
         try {
-            List<EnergyIndex> infoList = energyIndexService.selectEnergyIndexList(energyIndex);
+            List<MeterPoint> infoList = meterPointService.listMeterPointByQuery(meterPoint);
             return AjaxResult.success(infoList);
         } catch (Exception ex) {
             logger.error("获取关联采集指标出错！", ex);
@@ -81,8 +68,8 @@ public class HistoryDataTrendController extends BaseController {
     public AjaxResult getHistoricalDataByIndexId(HistoricalDataDTO dto) {
         try {
             // 获取点位信息
-            EnergyIndex energyIndex = energyIndexService.selectEnergyIndexById(dto.getIndexId());
-            if (ObjectUtils.isEmpty(energyIndex)) {
+            MeterPoint meterPoint = meterPointService.getMeterPointById(dto.getIndexId());
+            if (ObjectUtils.isEmpty(meterPoint)) {
                 return AjaxResult.error("未找到点位信息");
             }
             List<Date> dateList = new ArrayList<>();
@@ -96,28 +83,27 @@ public class HistoryDataTrendController extends BaseController {
                 return AjaxResult.error("时间间隔类型不正确");
             }
             // 查询计量器具
-            MeterImplement meterInfo = meterImplementService.selectMeterImplementById(energyIndex.getMeterId());
+            Meter meterInfo = meterImplementService.selectMeterImplementById(meterPoint.getMeterId());
             if (ObjectUtils.isEmpty(meterInfo)) {
                 return AjaxResult.error("未找到计量器具信息");
             }
             List<HistoricalDataVO> voList = new ArrayList<>();
             for (Date date : dateList) {
+                Date beginTime = date;
                 List<TagValue> tagValues = new ArrayList<>();
                 if(TimeType.DAY.name().equals(dto.getTimeType())){
-                    Date beginTime = date;
                     Date endTime = DateUtil.offsetHour(DateUtil.offsetMinute(date, CommonConst.DIGIT_MINUS_1), CommonConst.DIGIT_1);
-                    tagValues = realtimeDatabaseService.retrieve(energyIndex.getCode(), beginTime,endTime,CommonConst.DIGIT_1);
+                    tagValues = realtimeDatabaseService.retrieve(meterPoint.getCode(), beginTime,endTime,CommonConst.DIGIT_1);
                 }
                 if(TimeType.HOUR.name().equals(dto.getTimeType())){
-                    Date beginTime = date;
                     Date endTime = DateUtil.offsetMinute(DateUtil.offsetSecond(date, CommonConst.DIGIT_MINUS_1), CommonConst.DIGIT_1);
-                    tagValues = realtimeDatabaseService.retrieve(energyIndex.getCode(), beginTime,endTime,CommonConst.DIGIT_1);
+                    tagValues = realtimeDatabaseService.retrieve(meterPoint.getCode(), beginTime,endTime,CommonConst.DIGIT_1);
                 }
 
                 HistoricalDataVO vo = new HistoricalDataVO();
                 vo.setDataTime(DateUtil.formatDateTime(date));
-                vo.setIndexId(energyIndex.getIndexId());
-                vo.setIndexName(meterInfo.getInstallactionLocation() + "_" + meterInfo.getMeterName() + "_" + energyIndex.getName());
+                vo.setIndexId(meterPoint.getPointId());
+                vo.setIndexName(meterInfo.getInstallactionLocation() + "_" + meterInfo.getMeterName() + "_" + meterPoint.getName());
                 vo.setValue(CommonConst.DOUBLE_MINUS_SIGN);
                 if(ObjectUtils.isNotEmpty(tagValues)){
                     vo.setValue(tagValues.get(0).getValue().toString());
@@ -137,29 +123,29 @@ public class HistoryDataTrendController extends BaseController {
     public AjaxResult export(HistoricalDataDTO dto) {
         try {
             // 获取点位信息
-            EnergyIndex energyIndex = energyIndexService.selectEnergyIndexById(dto.getIndexId());
-            if (ObjectUtils.isEmpty(energyIndex)) {
+            MeterPoint meterPoint = meterPointService.getMeterPointById(dto.getIndexId());
+            if (ObjectUtils.isEmpty(meterPoint)) {
                 return AjaxResult.success("未找到点位信息");
             }
             Date beginTime = dto.getDataTime();
             Date endTime;
             // 查询条数
             int count = 23;
-            if ("DAY".equals(dto.getTimeType())) {
+            if (TimeTypeConst.TIME_TYPE_DAY.equals(dto.getTimeType())) {
                 endTime = DateUtil.endOfDay(beginTime);
             } else {
                 count = 19;
                 endTime = DateUtil.offsetSecond(DateUtil.offsetHour(beginTime, 1), -1);
             }
             // 查询计量器具
-            MeterImplement infor = meterImplementService.selectMeterImplementById(energyIndex.getMeterId());
-            List<TagValue> tagValueList = realtimeDatabaseService.retrieve(energyIndex.getCode(), beginTime, endTime,
+            Meter infor = meterImplementService.selectMeterImplementById(meterPoint.getMeterId());
+            List<TagValue> tagValueList = realtimeDatabaseService.retrieve(meterPoint.getCode(), beginTime, endTime,
                     RetrievalModes.BestFit, count);
             List<HistoricalDataExcel> excelList = new ArrayList<>();
             Date date = DateUtil.date();
             for (int i = 0; i < count + 1; i++) {
                 HistoricalDataExcel vo = new HistoricalDataExcel();
-                String indexName = energyIndex.getName();
+                String indexName = meterPoint.getName();
                 if (ObjectUtils.isNotEmpty(infor)) {
                     indexName = infor.getInstallactionLocation() + "_" + infor.getMeterName() + "_" + indexName;
                 }

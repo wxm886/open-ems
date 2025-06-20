@@ -10,7 +10,6 @@ import java.util.List;
  * 网关配置信息Mapper接口
  *
  * @author ZhiTan
- * @date 2024-10-30
  */
 public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
     /**
@@ -19,7 +18,7 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @param id 网关配置信息主键
      * @return 网关配置信息
      */
-    public GatewaySetting selectGatewaySettingById(String id);
+    GatewaySetting selectGatewaySettingById(String id);
 
     /**
      * 查询网关配置信息列表
@@ -27,7 +26,7 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @param gatewaySetting 网关配置信息
      * @return 网关配置信息集合
      */
-    public List<GatewaySetting> selectGatewaySettingList(GatewaySetting gatewaySetting);
+    List<GatewaySetting> selectGatewaySettingList(GatewaySetting gatewaySetting);
 
     /**
      * 新增网关配置信息
@@ -35,7 +34,7 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @param gatewaySetting 网关配置信息
      * @return 结果
      */
-    public int insertGatewaySetting(GatewaySetting gatewaySetting);
+    int insertGatewaySetting(GatewaySetting gatewaySetting);
 
     /**
      * 修改网关配置信息
@@ -43,7 +42,7 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @param gatewaySetting 网关配置信息
      * @return 结果
      */
-    public int updateGatewaySetting(GatewaySetting gatewaySetting);
+    int updateGatewaySetting(GatewaySetting gatewaySetting);
 
     /**
      * 删除网关配置信息
@@ -51,7 +50,7 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @param id 网关配置信息主键
      * @return 结果
      */
-    public int deleteGatewaySettingById(String id);
+    int deleteGatewaySettingById(String id);
 
     /**
      * 批量删除网关配置信息
@@ -59,7 +58,7 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteGatewaySettingByIds(String[] ids);
+    int deleteGatewaySettingByIds(String[] ids);
 
     /**
      * 校验网关编码是否唯一
@@ -68,14 +67,6 @@ public interface GatewaySettingMapper extends BaseMapper<GatewaySetting> {
      * @return 结果
      */
     int checkOne(GatewaySetting gatewaySetting);
-
-    /**
-     * 统计计量器具数量和测点数量
-     *
-     * @param gatewaySetting 过滤参数
-     * @return 结果
-     */
-    GatewaySetting ptNum(GatewaySetting gatewaySetting);
 
     int addNum(GatewaySetting gatewaySetting);
 

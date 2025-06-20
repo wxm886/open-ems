@@ -1,7 +1,7 @@
 package com.zhitan.web.controller.alarm;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.alarm.domain.AlarmItem;
+import com.zhitan.alarm.domain.entity.AlarmItem;
 import com.zhitan.alarm.services.IAlarmItemService;
 import com.zhitan.common.annotation.Log;
 import com.zhitan.common.core.controller.BaseController;
@@ -12,7 +12,8 @@ import com.zhitan.common.enums.BusinessType;
 import com.zhitan.common.utils.ServletUtils;
 import com.zhitan.common.utils.poi.ExcelUtil;
 import com.zhitan.framework.web.service.TokenService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,28 +23,17 @@ import java.util.Map;
 /**
  * 预报警设置Controller
  *
- * @author sys
- * @date 2020-03-02
+ * @author zhitan
  */
 @RestController
+@AllArgsConstructor
+@Api(tags = "预报警设置相关功能")
 @RequestMapping("/system/alarmitem")
 public class AlarmItemController extends BaseController {
 
-    @Autowired
     private IAlarmItemService alarmItemService;
-
-    @Autowired
     private TokenService tokenService;
 
-    /**
-     * 查询预报警设置列表
-     */
-    @PreAuthorize("@ss.hasPermi('system:alarmitem:list')")
-    @GetMapping("/list")
-    public TableDataInfo list(AlarmItem alarmItem,Long pageNum, Long pageSize) {
-        Page<AlarmItem> list = alarmItemService.selectAlarmItemPage(alarmItem,pageNum,pageSize);
-        return getDataTable(list);
-    }
 
     /**
      * 导出预报警设置列表
@@ -55,47 +45,6 @@ public class AlarmItemController extends BaseController {
         List<AlarmItem> list = alarmItemService.selectAlarmItemList(alarmItem);
         ExcelUtil<AlarmItem> util = new ExcelUtil<AlarmItem>(AlarmItem.class);
         return util.exportExcel(list, "set");
-    }
-
-    /**
-     * 获取预报警设置详细信息
-     */
-    @PreAuthorize("@ss.hasPermi('system:alarmitem:query')")
-    @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") String id) {
-        return AjaxResult.success(alarmItemService.selectAlarmItemById(id));
-    }
-
-    /**
-     * 新增预报警设置
-     */
-    @PreAuthorize("@ss.hasPermi('system:alarmitem:add')")
-    @Log(title = "预报警设置", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody AlarmItem alarmItem) {
-        return toAjax(alarmItemService.insertAlarmItem(alarmItem));
-    }
-
-    /**
-     * 修改预报警设置启停状态
-     */
-    @PreAuthorize("@ss.hasPermi('system:alarmitem:edit')")
-    @Log(title = "预报警设置", businessType = BusinessType.UPDATE)
-    @PostMapping(value = "/startstop/{flag}")
-    public AjaxResult edit(@PathVariable String flag, @RequestBody String[] ids) {
-        LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-        String username = loginUser.getUsername();
-        return toAjax(alarmItemService.updateStartStop(ids, flag, username));
-    }
-
-    /**
-     * 删除预报警设置
-     */
-    @PreAuthorize("@ss.hasPermi('system:alarmitem:remove')")
-    @Log(title = "预报警设置", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable String[] ids) {
-        return toAjax(alarmItemService.deleteAlarmItemByIds(ids));
     }
 
     /**

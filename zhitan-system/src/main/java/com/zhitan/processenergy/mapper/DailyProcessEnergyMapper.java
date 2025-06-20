@@ -10,9 +10,9 @@ import java.util.List;
 /**
  *工序能耗 日
  *
- * @author sys
+ * @author zhitan
  */
-public interface DailyProcessEnergyMapper extends BaseMapper<DailyProcessEnergy> {
+public interface DailyProcessEnergyMapper {
 
     /**
      *

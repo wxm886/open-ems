@@ -14,7 +14,6 @@ import java.util.Date;
  * 单价关联对象 cost_price_relevancy
  *
  * @author ZhiTan
- * @date 2024-11-09
  */
 @Data
 public class CostPriceRelevancyVo extends CostPriceRelevancy {

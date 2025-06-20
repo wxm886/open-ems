@@ -1,12 +1,12 @@
 package com.zhitan.comprehensivestatistics.service.impl;
 
-import com.zhitan.basicdata.domain.FacilityArchives;
+import com.zhitan.basicdata.domain.Device;
 import com.zhitan.common.enums.TimeType;
 import com.zhitan.common.utils.time.TimeManager;
 import com.zhitan.comprehensivestatistics.domain.ComprehensiveStatistics;
 import com.zhitan.comprehensivestatistics.mapper.ComprehensiveStatisticsMapper;
 import com.zhitan.comprehensivestatistics.service.IComprehensiveStatisticsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -17,15 +17,14 @@ import java.util.List;
 /**
  * 【请填写功能名称】Service业务层处理
  *
- * @author ruoyi
- * @date 2020-02-07
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public  class ComprehensiveStatisticsImpl implements IComprehensiveStatisticsService {
-    @Autowired
     private ComprehensiveStatisticsMapper statisticsMapperpper;
     @Override
-    public List<FacilityArchives> getFacilityArchives() {
+    public List<Device> getFacilityArchives() {
         return statisticsMapperpper.getFacilityArchives();
     }
 

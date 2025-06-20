@@ -11,8 +11,6 @@ import java.util.List;
 /**
  * 成本趋势分析-表格信息
  *
- * @Author: Zhujw
- * @Date: 2023/2/14
  */
 @Data
 @ApiModel(value = "成本趋势分析-表格信息", description = "成本趋势分析-表格信息")

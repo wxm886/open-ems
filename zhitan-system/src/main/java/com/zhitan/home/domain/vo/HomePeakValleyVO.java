@@ -1,16 +1,15 @@
 package com.zhitan.home.domain.vo;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * description todu
+ * description
  *
- * @author hmj
- * @date 2024-11-01 15:12
+ * @author zhitan
  */
-@Getter
-@Setter
+@Data
 public class HomePeakValleyVO {
     //尖、峰、平、谷 时段
     public String timeType;

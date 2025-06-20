@@ -1,7 +1,7 @@
 package com.zhitan.web.controller.alarm;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.alarm.domain.LimitType;
+import com.zhitan.alarm.domain.AlarmLimitType;
 import com.zhitan.alarm.services.IAlarmLimitTypeService;
 import com.zhitan.common.annotation.Log;
 import com.zhitan.common.core.controller.BaseController;
@@ -13,26 +13,23 @@ import com.zhitan.common.utils.ServletUtils;
 import com.zhitan.framework.web.service.TokenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * @Description  报警限值类型管理Controller
  *
- * @Author zhoubg
- * @Date 2024-10-11
+ * @Author zhitan
  */
 
 @RestController
-@RequestMapping("/alarm/limit")
+@AllArgsConstructor
 @Api(value = "报警限值类型管理",tags = {"报警限值类型管理"})
+@RequestMapping("/alarm/limit")
 public class AlarmLimitTypeController extends BaseController {
 
-    @Autowired
     private IAlarmLimitTypeService alarmLimitTypeService;
-
-    @Autowired
     private TokenService tokenService;
 
 
@@ -43,8 +40,8 @@ public class AlarmLimitTypeController extends BaseController {
     @PreAuthorize("@ss.hasPermi('basicsetting:limitType:list')")
     @GetMapping("/list")
     @ApiOperation(value = "报警限值列表")
-    public TableDataInfo list(LimitType alarmLimitType, Long pageNum, Long pageSize){
-        Page<LimitType> page = alarmLimitTypeService.selectAlarmLimitTypePage(alarmLimitType, pageNum, pageSize);
+    public TableDataInfo list(AlarmLimitType alarmLimitType, Long pageNum, Long pageSize){
+        Page<AlarmLimitType> page = alarmLimitTypeService.selectAlarmLimitTypePage(alarmLimitType, pageNum, pageSize);
         return getDataTable(page);
     }
 
@@ -67,7 +64,7 @@ public class AlarmLimitTypeController extends BaseController {
     @Log(title = "新增报警限值", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ApiOperation(value = "新增报警限值")
-    public AjaxResult add(@RequestBody LimitType alarmLimitType){
+    public AjaxResult add(@RequestBody AlarmLimitType alarmLimitType){
         LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
         alarmLimitType.setCreateBy(loginUser.getUsername());
         return toAjax(alarmLimitTypeService.insertAlarmLimitType(alarmLimitType)) ;
@@ -81,7 +78,7 @@ public class AlarmLimitTypeController extends BaseController {
     @Log(title = "修改报警限值", businessType = BusinessType.UPDATE)
     @PutMapping
     @ApiOperation(value = "计量器具列表")
-    public AjaxResult edit(@RequestBody LimitType alarmLimitType){
+    public AjaxResult edit(@RequestBody AlarmLimitType alarmLimitType){
         return toAjax(alarmLimitTypeService.updateAlarmLimitType(alarmLimitType));
     }
 

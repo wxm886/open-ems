@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Param;
  * 单价关联Mapper接口
  *
  * @author ZhiTan
- * @date 2024-11-09
  */
 public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy> {
     /**
@@ -19,7 +18,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      * @param id 单价关联主键
      * @return 单价关联
      */
-    public CostPriceRelevancy selectCostPriceRelevancyById(String id);
+    CostPriceRelevancy selectCostPriceRelevancyById(String id);
 
     /**
      * 查询单价关联列表
@@ -27,7 +26,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      * @param costPriceRelevancy 单价关联
      * @return 单价关联集合
      */
-    public List<CostPriceRelevancy> selectCostPriceRelevancyList(CostPriceRelevancy costPriceRelevancy);
+    List<CostPriceRelevancy> selectCostPriceRelevancyList(CostPriceRelevancy costPriceRelevancy);
 
     /**
      * 新增单价关联
@@ -35,7 +34,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      * @param costPriceRelevancy 单价关联
      * @return 结果
      */
-    public int insertCostPriceRelevancy(CostPriceRelevancy costPriceRelevancy);
+    int insertCostPriceRelevancy(CostPriceRelevancy costPriceRelevancy);
 
     /**
      * 修改单价关联
@@ -43,7 +42,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      * @param costPriceRelevancy 单价关联
      * @return 结果
      */
-    public int updateCostPriceRelevancy(CostPriceRelevancy costPriceRelevancy);
+    int updateCostPriceRelevancy(CostPriceRelevancy costPriceRelevancy);
 
     /**
      * 删除单价关联
@@ -51,7 +50,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      * @param id 单价关联主键
      * @return 结果
      */
-    public int deleteCostPriceRelevancyById(String id);
+    int deleteCostPriceRelevancyById(String id);
 
     /**
      * 批量删除单价关联
@@ -59,7 +58,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteCostPriceRelevancyByIds(String[] ids);
+    int deleteCostPriceRelevancyByIds(String[] ids);
 
 
 
@@ -68,7 +67,7 @@ public interface CostPriceRelevancyMapper extends BaseMapper<CostPriceRelevancy>
      *
 
      */
-    public CostPriceRelevancyVo selectCostPriceRelevancyByNodeId(@Param("nodeId") String nodeId,
+    CostPriceRelevancyVo selectCostPriceRelevancyByNodeId(@Param("nodeId") String nodeId,
                                                                  @Param("elType")String elType);
 
 

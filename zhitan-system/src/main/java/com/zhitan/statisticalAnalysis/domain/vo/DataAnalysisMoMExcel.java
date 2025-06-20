@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 /**
  * 数据分析环比 导出Excel
  *
- * @Author: Zhujw
- * @Date: 2023/3/3
  */
 @Data
 public class DataAnalysisMoMExcel {

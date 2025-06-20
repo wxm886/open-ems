@@ -6,6 +6,9 @@ import com.zhitan.consumptionanalysis.domain.vo.RankingEnergyData;
 import com.zhitan.home.domain.vo.HomeEnergyConsumptionTrendVO;
 import com.zhitan.home.domain.vo.HomePeakValleyVO;
 import com.zhitan.home.service.impl.IHomePageService;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,14 +19,15 @@ import java.util.List;
 /**
  * HomePageController
  *
- * @author hmj
- * @date 2024-10-08
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "首页")
 @RequestMapping("/homepage")
 public class HomePageController extends BaseController {
 
-    @Autowired
     public IHomePageService homepageService;
 
     /**
@@ -43,8 +47,7 @@ public class HomePageController extends BaseController {
 
     /**
      * @description: 能耗趋势
-     * @author: hmj
-     * @date: 2024/10/8 13:41
+     * @author zhitan
      */
     @GetMapping("/energyConsumptionTrend")
     public AjaxResult energyConsumptionTrend(String timeType) {
@@ -61,8 +64,7 @@ public class HomePageController extends BaseController {
 
     /**
      * @description: 科室能耗排名
-     * @author: hmj
-     * @date: 2024/10/8 13:41
+     * @author zhitan
      */
     @GetMapping("/energyConsumptionRanking")
     public AjaxResult energyConsumptionRanking(String timeType) {
@@ -78,8 +80,7 @@ public class HomePageController extends BaseController {
 
     /**
      * @description: 峰平谷占比
-     * @author: hmj
-     * @date: 2024/10/8 13:41
+     * @author zhitan
      */
     @GetMapping("/peakValley")
     public AjaxResult peakValley(String timeType) {

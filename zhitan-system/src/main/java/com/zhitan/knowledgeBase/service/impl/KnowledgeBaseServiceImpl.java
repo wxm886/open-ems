@@ -17,6 +17,7 @@ import com.zhitan.knowledgeBase.domain.vo.KnowledgeBasePageVO;
 import com.zhitan.knowledgeBase.mapper.KnowledgeBaseFileMapper;
 import com.zhitan.knowledgeBase.mapper.KnowledgeBaseMapper;
 import com.zhitan.knowledgeBase.service.IKnowledgeBaseService;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -28,14 +29,11 @@ import java.util.stream.Collectors;
 
 /**
  * 知识库(KnowledgeBase)表服务实现类
- *
- * @author makejava
- * @since 2025-01-10 15:05:28
  */
 @Service
+@AllArgsConstructor
 public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, KnowledgeBase> implements IKnowledgeBaseService {
 
-    @Resource
     private KnowledgeBaseFileMapper fileMapper;
 
 

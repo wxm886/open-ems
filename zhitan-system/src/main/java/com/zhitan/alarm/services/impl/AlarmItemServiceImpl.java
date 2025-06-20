@@ -2,11 +2,12 @@ package com.zhitan.alarm.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.alarm.domain.AlarmItem;
+import com.zhitan.alarm.domain.entity.AlarmItem;
 import com.zhitan.alarm.mapper.AlarmItemMapper;
 import com.zhitan.alarm.services.IAlarmItemService;
 import com.zhitan.common.utils.DateUtils;
 import com.zhitan.common.utils.uuid.IdUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,24 +19,12 @@ import java.util.Map;
 /**
  * 预报警设置Service业务层处理
  *
- * @author sys
- * @date 2020-03-02
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public class AlarmItemServiceImpl implements IAlarmItemService {
-    @Autowired
     private AlarmItemMapper alarmItemMapper;
-
-    /**
-     * 查询预报警设置
-     *
-     * @param id 预报警设置ID
-     * @return 预报警设置
-     */
-    @Override
-    public AlarmItem selectAlarmItemById(String id) {
-        return alarmItemMapper.selectAlarmItemById(id);
-    }
 
     /**
      * 查询预报警设置列表
@@ -49,18 +38,6 @@ public class AlarmItemServiceImpl implements IAlarmItemService {
     }
 
     /**
-     * 新增预报警设置
-     *
-     * @param alarmItem 预报警设置
-     * @return 结果
-     */
-    @Override
-    public int insertAlarmItem(AlarmItem alarmItem) {
-        alarmItem.setCreateTime(DateUtils.getNowDate());
-        return alarmItemMapper.insertAlarmItem(alarmItem);
-    }
-
-    /**
      * 修改预报警设置
      *
      * @param alarmItem 预报警设置
@@ -70,29 +47,6 @@ public class AlarmItemServiceImpl implements IAlarmItemService {
     public int updateAlarmItem(AlarmItem alarmItem) {
         alarmItem.setUpdateTime(DateUtils.getNowDate());
         return alarmItemMapper.updateAlarmItem(alarmItem);
-    }
-
-    /**
-     * 修改预报警设置
-     *
-     * @param ids,flag 预报警设置
-     * @return 结果
-     */
-    @Override
-    public int updateStartStop(String[] ids, String flag, String username) {
-
-        return alarmItemMapper.updateStartStop(ids, flag, username);
-    }
-
-    /**
-     * 批量删除预报警设置
-     *
-     * @param ids 需要删除的预报警设置ID
-     * @return 结果
-     */
-    @Override
-    public int deleteAlarmItemByIds(String[] ids) {
-        return alarmItemMapper.deleteAlarmItemByIds(ids);
     }
 
     /**
@@ -195,10 +149,5 @@ public class AlarmItemServiceImpl implements IAlarmItemService {
         return alarmItemMapper.getAllAlarmItem();
     }
 
-    @Override
-    public Page<AlarmItem> selectAlarmItemPage(AlarmItem alarmItem, Long pageNum, Long pageSize) {
-        LambdaQueryWrapper<AlarmItem> queryWrapper =new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(AlarmItem::getCreateTime);
-        return alarmItemMapper.selectPage(new Page<>(pageNum,pageSize),queryWrapper);
-    }
+
 }

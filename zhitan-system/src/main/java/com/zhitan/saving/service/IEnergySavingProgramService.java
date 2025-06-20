@@ -12,7 +12,6 @@ import com.zhitan.saving.domain.vo.EnergySavingProgramVO;
  * Service接口
  *
  * @author ZhiTan
- * @date 2024-12-26
  */
 public interface IEnergySavingProgramService extends IService<EnergySavingProgram> {
     /**

@@ -4,13 +4,13 @@ import com.zhitan.common.annotation.Log;
 import com.zhitan.common.core.controller.BaseController;
 import com.zhitan.common.core.domain.AjaxResult;
 import com.zhitan.energyMonitor.service.IElectricThreePhaseService;
-import com.zhitan.model.domain.EnergyIndex;
-import com.zhitan.model.service.IEnergyIndexService;
+import com.zhitan.model.domain.MeterPoint;
+import com.zhitan.model.service.IMeterPointService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,20 +20,16 @@ import java.util.List;
 
 /**
  * @Description: 三相不平衡
- * @Author: yxw
- * @Date: 2022-04-24
- * @Version: V1.2
  */
-@Api(tags = "三相不平衡")
-@RestController
-@RequestMapping("/threePhaseUnbalanceAnalysis")
 @Slf4j
+@RestController
+@AllArgsConstructor
+@Api(tags = "三相不平衡")
+@RequestMapping("/threePhaseUnbalanceAnalysis")
 public class ElectricThreePhaseController extends BaseController {
 
-    @Autowired
     private IElectricThreePhaseService electricThreePhaseService;
-    @Autowired
-    private IEnergyIndexService energyIndexService;
+    private IMeterPointService meterPointService;
 
     /**
      * 获取用能单元下的某个电表的三相不平衡数据
@@ -49,7 +45,7 @@ public class ElectricThreePhaseController extends BaseController {
     @ApiOperation(value = "根据电表id查询三相不平衡数据", notes = "根据电表id查询三相不平衡数据")
     @GetMapping(value = "/detail")
     public AjaxResult list(@RequestParam(name = "nodeId") String nodeId,
-                           @RequestParam(name = "meterId") String meterId,
+                           @RequestParam(name = "meterId", required = false) String meterId,
                            @RequestParam(name = "timeType") String timeType,
                            @RequestParam(name = "timeCode") String timeCode,
                            @RequestParam(name = "requestType") String requestType) {
@@ -57,9 +53,9 @@ public class ElectricThreePhaseController extends BaseController {
             return AjaxResult.error("电表id不能为空");
         }
 
-        List<EnergyIndex> energyIndexList = energyIndexService.listDeviceIndex(nodeId, meterId);
+        List<MeterPoint> meterPointList = meterPointService.listMeterPointByNodeIdAndMeterId(nodeId, meterId);
 
-        return AjaxResult.success(electricThreePhaseService.list(timeType, timeCode, energyIndexList, requestType, meterId));
+        return AjaxResult.success(electricThreePhaseService.list(timeType, timeCode, meterPointList, requestType, meterId));
     }
 
 }

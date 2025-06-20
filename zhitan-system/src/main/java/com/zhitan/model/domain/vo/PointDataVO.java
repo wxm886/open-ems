@@ -1,11 +1,12 @@
 package com.zhitan.model.domain.vo;
 
+import lombok.Data;
+
 /**
  * 模型点位id与名称
  *
- * @Author: Zhujw
- * @Date: 2023/3/6
  */
+@Data
 public class PointDataVO {
 
   /**
@@ -18,19 +19,4 @@ public class PointDataVO {
    */
   private String indexName;
 
-  public String getIndexId() {
-    return indexId;
-  }
-
-  public void setIndexId(String indexId) {
-    this.indexId = indexId;
-  }
-
-  public String getIndexName() {
-    return indexName;
-  }
-
-  public void setIndexName(String indexName) {
-    this.indexName = indexName;
-  }
 }

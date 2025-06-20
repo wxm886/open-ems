@@ -2,19 +2,11 @@ package com.zhitan.alarm.domain.vo;
 
 import com.zhitan.consumptionanalysis.domain.vo.ChartData;
 import com.zhitan.consumptionanalysis.domain.vo.EnergyProportion;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.List;
 
-/**
- * description todu
- *
- * @author hmj
- * @date 2024-10-26 17:38
- */
-@Getter
-@Setter
+@Data
 public class AlarmAnalysisVO {
 
     /**

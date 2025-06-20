@@ -9,7 +9,6 @@ import java.util.List;
  * 系统名称配置Mapper接口
  *
  * @author ZhiTan
- * @date 2024-11-05
  */
 public interface SysNameConfigMapper extends BaseMapper<SysNameConfig> {
     /**

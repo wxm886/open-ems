@@ -8,6 +8,8 @@ import com.zhitan.common.utils.StringUtils;
 import com.zhitan.productoutput.domain.ProductOutput;
 import com.zhitan.productoutput.mapper.ProductOutputMapper;
 import com.zhitan.productoutput.services.IProductOutputService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +19,12 @@ import java.util.List;
  * 产品产量Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-10-08
  */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class ProductOutputServiceImpl extends ServiceImpl<ProductOutputMapper, ProductOutput> implements IProductOutputService {
-    @Autowired
+
     private ProductOutputMapper productOutputMapper;
 
     /**

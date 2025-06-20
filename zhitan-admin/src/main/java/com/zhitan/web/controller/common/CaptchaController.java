@@ -7,6 +7,9 @@ import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +28,9 @@ import com.zhitan.system.service.ISysConfigService;
  * 
  * @author zhitan
  */
+@Slf4j
+@AllArgsConstructor
+@Api(tags = "验证码")
 @RestController
 public class CaptchaController
 {

@@ -1,15 +1,12 @@
 package com.zhitan.web.controller.costmanagement;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhitan.common.core.page.TableDataInfo;
-import com.zhitan.costmanagement.domain.CostElectricityInput;
 import com.zhitan.framework.web.service.TokenService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import javax.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,21 +21,20 @@ import com.zhitan.common.core.domain.AjaxResult;
 import com.zhitan.common.enums.BusinessType;
 import com.zhitan.costmanagement.domain.CostPriceRelevancy;
 import com.zhitan.costmanagement.service.ICostPriceRelevancyService;
-import com.zhitan.common.utils.poi.ExcelUtil;
 
 /**
  * 单价关联Controller
  * 
- * @author ZhiTan
- * @date 2024-11-09
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "单价关联管理")
 @RequestMapping("/cost/relevancy")
 public class CostPriceRelevancyController extends BaseController
 {
-    @Resource
     private ICostPriceRelevancyService costPriceRelevancyService;
-    @Autowired
     private TokenService tokenService;
 
     /**
@@ -52,20 +48,6 @@ public class CostPriceRelevancyController extends BaseController
         Page<CostPriceRelevancy> page =  costPriceRelevancyService.selectCostPriceRelevancyList(costPriceRelevancy, pageNum, pageSize);
         return getDataTable(page);
     }
-
-
-//    /**
-//     * 导出单价关联列表
-//     */
-//    @PreAuthorize("@ss.hasPermi('costmanagement:relevancy:export')")
-//    @Log(title = "单价关联", businessType = BusinessType.EXPORT)
-//    @PostMapping("/export")
-//    public void export(HttpServletResponse response, CostPriceRelevancy costPriceRelevancy)
-//    {
-//        List<CostPriceRelevancy> list = costPriceRelevancyService.selectCostPriceRelevancyList(costPriceRelevancy);
-//        ExcelUtil<CostPriceRelevancy> util = new ExcelUtil<CostPriceRelevancy>(CostPriceRelevancy.class);
-//        util.exportExcel(response, list, "单价关联数据");
-//    }
 
     /**
      * 获取单价关联详细信息

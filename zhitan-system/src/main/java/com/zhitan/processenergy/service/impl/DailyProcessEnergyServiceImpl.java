@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhitan.processenergy.domain.DailyProcessEnergy;
 import com.zhitan.processenergy.mapper.DailyProcessEnergyMapper;
 import com.zhitan.processenergy.service.IDailyProcessEnergyService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -14,11 +17,15 @@ import java.util.List;
 /**
  *重点设备能耗统计 日
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
+@Slf4j
 @Service
-public class DailyProcessEnergyServiceImpl extends ServiceImpl<DailyProcessEnergyMapper,DailyProcessEnergy> implements IDailyProcessEnergyService {
+@AllArgsConstructor
+public class DailyProcessEnergyServiceImpl implements IDailyProcessEnergyService {
+
+    @Resource
+    private DailyProcessEnergyMapper baseMapper;
 
 
     @Override

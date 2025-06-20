@@ -143,7 +143,7 @@ public class Constants
     /**
      * 指标模板 redis key
      */
-    public static final String DAQ_TEMPLATE_KEY = "daq_template";
+    public static final String POINT_TEMPLATE_KEY = "point_template";
     
     /**
      * RMI 远程方法调用

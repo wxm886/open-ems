@@ -1,12 +1,16 @@
 package com.zhitan.web.controller.common;
 
 import com.zhitan.common.config.BaseConfig;
+import com.zhitan.common.constant.CommonConst;
 import com.zhitan.common.constant.Constants;
 import com.zhitan.common.core.domain.AjaxResult;
 import com.zhitan.common.utils.StringUtils;
 import com.zhitan.common.utils.file.FileUploadUtils;
 import com.zhitan.common.utils.file.FileUtils;
 import com.zhitan.framework.config.ServerConfig;
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -27,18 +31,14 @@ import java.util.List;
  * 
  * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
+@Api(tags = "通用")
 @RequestMapping("/common")
 public class CommonController
 {
-    private static final Logger log = LoggerFactory.getLogger(CommonController.class);
-
-    @Resource
     private ServerConfig serverConfig;
-
-    private static final String FILE_DELIMETER = ",";
-
-    @Resource
     private BaseConfig baseConfig;
 
     /**
@@ -124,10 +124,10 @@ public class CommonController
                 originalFilenames.add(file.getOriginalFilename());
             }
             AjaxResult ajax = AjaxResult.success();
-            ajax.put("urls", StringUtils.join(urls, FILE_DELIMETER));
-            ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMETER));
-            ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMETER));
-            ajax.put("originalFilenames", StringUtils.join(originalFilenames, FILE_DELIMETER));
+            ajax.put("urls", StringUtils.join(urls, CommonConst.STR_COMMA));
+            ajax.put("fileNames", StringUtils.join(fileNames, CommonConst.STR_COMMA));
+            ajax.put("newFileNames", StringUtils.join(newFileNames, CommonConst.STR_COMMA));
+            ajax.put("originalFilenames", StringUtils.join(originalFilenames, CommonConst.STR_COMMA));
             return ajax;
         }
         catch (Exception e)

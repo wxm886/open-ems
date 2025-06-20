@@ -9,8 +9,7 @@ import java.util.List;
 /**
  *重点设备能耗统计 月
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 public interface IMonthlyKeyEquipmentService {
 

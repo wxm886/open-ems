@@ -1,7 +1,7 @@
 package com.zhitan.realtimedata.data.influxdb;
 
 /**
- * @author 范新富
+ * @author zhitan
  * <p>
  * 获取实时数据方式.
  */

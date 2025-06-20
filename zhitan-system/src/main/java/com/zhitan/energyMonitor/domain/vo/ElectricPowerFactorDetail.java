@@ -3,9 +3,7 @@ package com.zhitan.energyMonitor.domain.vo;
 import lombok.Data;
 
 /**
- * @Description: TODO
- * @author: yxw
- * @date: 2022年04月24日 16:59
+ * @Description:
  */
 @Data
 public class ElectricPowerFactorDetail {

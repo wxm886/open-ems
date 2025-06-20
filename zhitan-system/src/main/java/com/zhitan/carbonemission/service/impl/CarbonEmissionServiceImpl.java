@@ -12,7 +12,8 @@ import com.zhitan.carbonemission.domain.vo.carbonEmissionYQVO;
 import com.zhitan.carbonemission.service.ICarbonEmissionService;
 import com.zhitan.common.utils.DateUtils;
 import com.zhitan.common.utils.StringUtils;
-import com.zhitan.dataitem.mapper.DataItemMapper;
+import com.zhitan.energyUsed.mapper.EnergyUsedMapper;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -25,16 +26,13 @@ import java.util.stream.Collectors;
 /**
  * 【碳排放核算】Service业务层处理
  *
- * @author lsk
- * @date 2024-10-29
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
 
-    @Resource
-    private DataItemMapper dataItemMapper;
-
-    @Resource
+    private EnergyUsedMapper energyUsedMapper;
     private SysEnergyMapper sysEnergyMapper;
 
     private final static String[] YEAR = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
@@ -69,17 +67,21 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
         Date lastTime = DateUtil.offsetMonth(beginTime, -12);
         Date lastEndTime = DateUtil.offsetMonth(endTime, -12);
         // 获取当前年份和上一年份的碳排放数据
-        List<CarbonEmission> upCarbonEmission = dataItemMapper.getUpCarbonEmission(beginTime, endTime, carbonEmissionDTO.getTimeType(), carbonEmissionDTO.getNodeId());
+        List<CarbonEmission> upCarbonEmission = energyUsedMapper.getUpCarbonEmission(
+                beginTime, endTime, carbonEmissionDTO.getTimeType(), carbonEmissionDTO.getNodeId());
 
-        List<CarbonEmission> upLastCarbonEmission = dataItemMapper.getUpCarbonEmission(lastTime, lastEndTime, carbonEmissionDTO.getTimeType(), carbonEmissionDTO.getNodeId());
+        List<CarbonEmission> upLastCarbonEmission = energyUsedMapper.getUpCarbonEmission(
+                lastTime, lastEndTime, carbonEmissionDTO.getTimeType(), carbonEmissionDTO.getNodeId());
         List<SysEnergy> sysEnergies = sysEnergyMapper.selectList(null);
         if (ObjectUtil.isEmpty(sysEnergies)) {
             throw new RuntimeException("获取碳排放转换率时出错: 系统能源数据为空");
         }
 
         // 构建能源映射和碳排放数据映射
-        Map<String, SysEnergy> energyMap = sysEnergies.stream().collect(Collectors.toMap(SysEnergy::getEnersno, Function.identity()));
-        final List<String> energyType = sysEnergies.stream().map(SysEnergy::getEnersno).collect(Collectors.toList());
+        Map<String, SysEnergy> energyMap = sysEnergies.stream()
+                .collect(Collectors.toMap(SysEnergy::getEnersno, Function.identity()));
+        final List<String> energyType = sysEnergies.stream()
+                .map(SysEnergy::getEnersno).collect(Collectors.toList());
 
         double allValue = 0.0;
         double allLastValue = 0.0;
@@ -88,8 +90,8 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
 
         // 计算每种能源的当前值和去年的值
         for (String s : energyType) {
-            final double value = getValues(energyMap, upCarbonEmission,energyType);
-            final double lastYearValueNum = getValues(energyMap, upLastCarbonEmission,energyType);
+            final double value = getValues(energyMap, upCarbonEmission, s);
+            final double lastYearValueNum = getValues(energyMap, upLastCarbonEmission, s);
             allValue += value;
             allLastValue += lastYearValueNum;
             final CarbonEmissionRankVO carbonEmissionRankVO = new CarbonEmissionRankVO();
@@ -105,7 +107,7 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
         upData.add(carbonEmissionRankVOAll);
 
         // 计算下方的碳排放并排序
-        List<CarbonEmissionRankVO> carbonEmissionRankVOS = calculateDownCarbonEmission(beginTime, endTime, carbonEmissionDTO, energyMap,sysEnergies);
+        List<CarbonEmissionRankVO> carbonEmissionRankVOS = calculateDownCarbonEmission(beginTime, endTime, carbonEmissionDTO, energyMap, sysEnergies);
         carbonEmissionRankVOS.sort(Comparator.comparing(CarbonEmissionRankVO::getAllValue).reversed());
         stringObjectMap.put("down", carbonEmissionRankVOS);
         stringObjectMap.put("upData", upData);
@@ -115,16 +117,15 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
 
     // 计算同比增长率
     private double calculateYOY(double current, double last) {
-        if(last !=0.0) {
+        if (last != 0.0) {
             return (current - last) / last * 100;
         }
         return 0;
-//        return (current - last) / (last == 0.0 ? 1 : last) * 100;
     }
 
     // 计算下方的碳排放
-    private List<CarbonEmissionRankVO> calculateDownCarbonEmission(Date beginTime, Date endTime, CarbonEmissionDTO carbonEmissionDTO, Map<String, SysEnergy> energyMap,List<SysEnergy> sysEnergies) {
-        List<CarbonEmission> downCarbonEmission = dataItemMapper.getDownCarbonEmission(beginTime, endTime, carbonEmissionDTO.getTimeType(), carbonEmissionDTO.getNodeId());
+    private List<CarbonEmissionRankVO> calculateDownCarbonEmission(Date beginTime, Date endTime, CarbonEmissionDTO carbonEmissionDTO, Map<String, SysEnergy> energyMap, List<SysEnergy> sysEnergies) {
+        List<CarbonEmission> downCarbonEmission = energyUsedMapper.getDownCarbonEmission(beginTime, endTime, carbonEmissionDTO.getTimeType(), carbonEmissionDTO.getNodeId());
         List<CarbonEmissionRankVO> carbonEmissionRankVOS = new ArrayList<>();
 
         final List<String> energyType = sysEnergies.stream().map(SysEnergy::getEnersno).collect(Collectors.toList());
@@ -144,8 +145,8 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
                         throw new RuntimeException("获取碳排放转换率时出错: 系统能源数据中不存在" + s + "能源类型");
                     }
                     double value = v.stream().filter(ec -> ec.getEnergyId().equals(s))
-                        .mapToDouble(CarbonEmission::getValue)
-                        .sum();
+                            .mapToDouble(CarbonEmission::getValue)
+                            .sum();
                     double calculatedValue = Double.parseDouble(df.format(sysEnergy.getCoefficient().doubleValue() * value));
 
                     switch (s) {
@@ -174,7 +175,6 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
     public List<carbonEmissionYQVO> getMiddleCarbonEmission(CarbonEmissionDTO carbonEmissionDTO) {
         validate(carbonEmissionDTO, "Y");
         // 该方法用于计算碳排放总值并返回结果
-        Map<String, Object> stringObjectMap = new HashMap<>();
         Date beginTime;
         Date endTime;
         final String timeType = carbonEmissionDTO.getTimeType();
@@ -212,12 +212,20 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
         }
 
         // 构建能源映射和碳排放数据映射
-        Map<String, SysEnergy> energyMap = sysEnergies.stream().collect(Collectors.toMap(SysEnergy::getEnersno, Function.identity()));
-        final List<String> energyType = sysEnergies.stream().map(SysEnergy::getEnersno).collect(Collectors.toList());
-        final List<CarbonEmission> middleCarbonEmission = dataItemMapper.getMiddleCarbonEmission(beginTime, endTime, timeTypeStr, carbonEmissionDTO.getNodeId(), carbonEmissionDTO.getEmissionType());
-        final List<CarbonEmission> lastMiddleCarbonEmission = dataItemMapper.getMiddleCarbonEmission(lastTime, lastEndTime, timeTypeStr, carbonEmissionDTO.getNodeId(), carbonEmissionDTO.getEmissionType());
-        final Map<String, List<CarbonEmission>> collect = middleCarbonEmission.stream().collect(Collectors.groupingBy(CarbonEmission::getDataTimeStr));
-        final Map<String, List<CarbonEmission>> lastCollect = lastMiddleCarbonEmission.stream().collect(Collectors.groupingBy(CarbonEmission::getDataTimeStr));
+        Map<String, SysEnergy> energyMap = sysEnergies.stream()
+                .collect(Collectors.toMap(SysEnergy::getEnersno, Function.identity()));
+        final List<String> energyType = sysEnergies.stream()
+                .map(SysEnergy::getEnersno).collect(Collectors.toList());
+        final List<CarbonEmission> middleCarbonEmission =
+                energyUsedMapper.getMiddleCarbonEmission(
+                        beginTime, endTime, timeTypeStr, carbonEmissionDTO.getNodeId(), carbonEmissionDTO.getEmissionType());
+        final List<CarbonEmission> lastMiddleCarbonEmission =
+                energyUsedMapper.getMiddleCarbonEmission(
+                        lastTime, lastEndTime, timeTypeStr, carbonEmissionDTO.getNodeId(), carbonEmissionDTO.getEmissionType());
+        final Map<String, List<CarbonEmission>> collect = middleCarbonEmission.stream()
+                .collect(Collectors.groupingBy(CarbonEmission::getDataTimeStr));
+        final Map<String, List<CarbonEmission>> lastCollect = lastMiddleCarbonEmission.stream()
+                .collect(Collectors.groupingBy(CarbonEmission::getDataTimeStr));
         List<carbonEmissionYQVO> carbonEmissionYQVOS = new ArrayList<>();
         for (int i = 0; i < XAxis.length; i++) {
             // 当前时间段的碳排放数据
@@ -225,12 +233,12 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
             // 上一时间段的碳排放数据
             final List<CarbonEmission> lastCarbonEmissions = lastCollect.get(XAxis[i]);
             // 总值
-            double totalValue = getValues(energyMap, carbonEmissions,energyType);
+            double totalValue = getValues(energyMap, carbonEmissions, energyType);
             // 上一时间段的总值
-            double totalLastValue = getValues(energyMap, lastCarbonEmissions,energyType);
+            double totalLastValue = getValues(energyMap, lastCarbonEmissions, energyType);
             // 前一次的总值
-            double totalFrontValue = (i == 0) ? 0.0 : getValues(energyMap, collect.get(XAxis[i - 1]),energyType);
-            final carbonEmissionYQVO carbonEmissionYQVO = new carbonEmissionYQVO(XAxis[i] ,  String.format("%.2f", totalValue) ,String.format("%.2f", calculateYOY(totalValue, totalLastValue)) , String.format("%.2f", calculateYOY(totalValue, totalFrontValue)));
+            double totalFrontValue = (i == 0) ? 0.0 : getValues(energyMap, collect.get(XAxis[i - 1]), energyType);
+            final carbonEmissionYQVO carbonEmissionYQVO = new carbonEmissionYQVO(XAxis[i], String.format("%.2f", totalValue), String.format("%.2f", calculateYOY(totalValue, totalLastValue)), String.format("%.2f", calculateYOY(totalValue, totalFrontValue)));
             carbonEmissionYQVOS.add(carbonEmissionYQVO);
         }
         return carbonEmissionYQVOS;
@@ -253,35 +261,61 @@ public class CarbonEmissionServiceImpl implements ICarbonEmissionService {
     }
 
 
-    public static double getValues(Map<String, SysEnergy> energyMap, List<CarbonEmission> carbonEmissions,List<String> energyType) {
+    public static double getValues(Map<String, SysEnergy> energyMap, List<CarbonEmission> carbonEmissions, List<String> energyTypeList) {
         if (CollectionUtils.isEmpty(carbonEmissions)) {
             return 0.0;
         }
-
         // 初始化总值
         double allValue = 0.0;
-
         // 按能源ID分组
         final Map<String, List<CarbonEmission>> energyValueMap = carbonEmissions.stream()
                 .collect(Collectors.groupingBy(CarbonEmission::getEnergyId));
-//        final List<String> energyType = sysEnergies.stream().map(SysEnergy::getEnersno).collect(Collectors.toList());
-// 计算每种能源的当前值
-        for (String s : energyType) {
-            SysEnergy sysEnergy = energyMap.get(s);
+
+        for (String energyType : energyTypeList) {
+            // 计算每种能源的当前值
+            SysEnergy sysEnergy = energyMap.get(energyType);
 
             // 确保能源存在且系数不为空
             if (sysEnergy == null || sysEnergy.getCoefficient() == null) {
-                throw new RuntimeException("获取碳排放转换率时出错: 系统能源数据中不存在或系数为空" + s + "能源类型");
+                throw new RuntimeException("获取碳排放转换率时出错: 系统能源数据中不存在或系数为空" + energyType + "能源类型");
             }
 
             // 获取对应能源的值
-            double value = energyValueMap.getOrDefault(s, Collections.emptyList()).stream()
+            double value = energyValueMap.getOrDefault(energyType, Collections.emptyList()).stream()
                     .mapToDouble(CarbonEmission::getValue)
                     .sum();
 
             // 直接计算总值，避免冗余的转换
             allValue += sysEnergy.getCoefficient().doubleValue() * value;
         }
+        // 格式化最终结果
+        return Double.parseDouble(new DecimalFormat("#.00").format(allValue));
+    }
+
+    public static double getValues(Map<String, SysEnergy> energyMap, List<CarbonEmission> carbonEmissions, String energyType) {
+        if (CollectionUtils.isEmpty(carbonEmissions)) {
+            return 0.0;
+        }
+        // 初始化总值
+        double allValue = 0.0;
+        // 按能源ID分组
+        final Map<String, List<CarbonEmission>> energyValueMap = carbonEmissions.stream()
+                .collect(Collectors.groupingBy(CarbonEmission::getEnergyId));
+        // 计算每种能源的当前值
+        SysEnergy sysEnergy = energyMap.get(energyType);
+
+        // 确保能源存在且系数不为空
+        if (sysEnergy == null || sysEnergy.getCoefficient() == null) {
+            throw new RuntimeException("获取碳排放转换率时出错: 系统能源数据中不存在或系数为空" + energyType + "能源类型");
+        }
+
+        // 获取对应能源的值
+        double value = energyValueMap.getOrDefault(energyType, Collections.emptyList()).stream()
+                .mapToDouble(CarbonEmission::getValue)
+                .sum();
+
+        // 直接计算总值，避免冗余的转换
+        allValue += sysEnergy.getCoefficient().doubleValue() * value;
 
         // 格式化最终结果
         return Double.parseDouble(new DecimalFormat("#.00").format(allValue));

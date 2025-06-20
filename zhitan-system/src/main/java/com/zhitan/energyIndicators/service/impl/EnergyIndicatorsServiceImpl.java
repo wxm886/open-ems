@@ -9,6 +9,7 @@ import com.zhitan.common.utils.StringUtils;
 import com.zhitan.energyIndicators.domain.EnergyIndicators;
 import com.zhitan.energyIndicators.mapper.EnergyIndicatorsMapper;
 import com.zhitan.energyIndicators.service.IEnergyIndicatorsService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,10 @@ import org.springframework.stereotype.Service;
  * 能源指标Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-10-25
  */
 @Service
+@AllArgsConstructor
 public class EnergyIndicatorsServiceImpl extends ServiceImpl<EnergyIndicatorsMapper, EnergyIndicators> implements IEnergyIndicatorsService {
-    @Autowired
     private EnergyIndicatorsMapper energyIndicatorsMapper;
 
     /**
@@ -47,7 +47,6 @@ public class EnergyIndicatorsServiceImpl extends ServiceImpl<EnergyIndicatorsMap
         wrapper.orderByDesc(EnergyIndicators::getCreateTime);
         Page<EnergyIndicators> page = energyIndicatorsMapper.selectPage(new Page<EnergyIndicators>(pageNum, pageSize), wrapper);
         return page;
-//        return energyIndicatorsMapper.selectEnergyIndicatorsList(energyIndicators);
     }
     /**
      * 查询能源指标列表

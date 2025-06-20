@@ -5,9 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: TODO
- * @author: yxw
- * @date: 2022年04月15日 10:07
+ * @Description:
  */
 @Data
 public class EnergyCostTrendPage {

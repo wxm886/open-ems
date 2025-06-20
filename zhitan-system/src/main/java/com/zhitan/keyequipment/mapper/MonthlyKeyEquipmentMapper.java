@@ -9,11 +9,10 @@ import java.util.List;
 /**
  *重点设备能耗统计 月
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 public interface MonthlyKeyEquipmentMapper {
-    public List<MonthlyKeyEquipment> getMonthlyKeyEquipmentList(@Param("indexIds") List<String> indexIds,
+    List<MonthlyKeyEquipment> getMonthlyKeyEquipmentList(@Param("indexIds") List<String> indexIds,
                                                                 @Param("dataList") List<MonthlyKeyEquipment> dataList,
                                                                 @Param("beginTime") Date beginTime,
                                                                 @Param("endTime") Date endTime,

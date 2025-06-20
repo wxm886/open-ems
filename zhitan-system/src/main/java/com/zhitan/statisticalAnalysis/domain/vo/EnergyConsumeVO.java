@@ -10,8 +10,6 @@ import java.util.Date;
 /**
  * 能耗实体类
  *
- * @Author: Zhujw
- * @Date: 2023/1/28
  */
 @Data
 public class EnergyConsumeVO implements Serializable {

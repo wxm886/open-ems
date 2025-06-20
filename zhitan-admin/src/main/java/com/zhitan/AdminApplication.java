@@ -14,7 +14,6 @@ public class AdminApplication
 {
     public static void main(String[] args)
     {
-        // System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(AdminApplication.class, args);
         System.out.println("项目启动成功");
     }

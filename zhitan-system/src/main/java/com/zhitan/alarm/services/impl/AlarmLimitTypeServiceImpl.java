@@ -2,35 +2,31 @@ package com.zhitan.alarm.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.alarm.domain.LimitType;
+import com.zhitan.alarm.domain.AlarmLimitType;
 import com.zhitan.alarm.mapper.AlarmLimitTypeMapper;
 import com.zhitan.alarm.services.IAlarmLimitTypeService;
 import com.zhitan.common.utils.DateUtils;
 import com.zhitan.common.utils.StringUtils;
+import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @Description
- * @Author zhoubg
- * @Date 2024/10/11
- */
+
 @Service
+@AllArgsConstructor
 public class AlarmLimitTypeServiceImpl implements IAlarmLimitTypeService {
 
-    @Autowired
     private AlarmLimitTypeMapper alarmLimitTypeMapper;
 
     @Override
-    public int insertAlarmLimitType(LimitType alarmLimitType) {
+    public int insertAlarmLimitType(AlarmLimitType alarmLimitType) {
         alarmLimitType.setId(UUID.randomUUID().toString());
         alarmLimitType.setCreateTime(DateUtils.getNowDate());
-        LambdaQueryWrapper<LimitType> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(LimitType::getLimitCode,alarmLimitType.getLimitCode());
+        LambdaQueryWrapper<AlarmLimitType> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(AlarmLimitType::getLimitCode,alarmLimitType.getLimitCode());
         final Long aLong = alarmLimitTypeMapper.selectCount(queryWrapper);
         if(aLong>0){
             throw new RuntimeException("限制值类型编号不能重复");
@@ -39,18 +35,18 @@ public class AlarmLimitTypeServiceImpl implements IAlarmLimitTypeService {
     }
 
     @Override
-    public List<LimitType> selectAlarmLimitTypeList(LimitType alarmLimitType) {
+    public List<AlarmLimitType> selectAlarmLimitTypeList(AlarmLimitType alarmLimitType) {
         return alarmLimitTypeMapper.selectLimitTypeList(alarmLimitType);
     }
 
     @Override
-    public int updateAlarmLimitType(LimitType alarmLimitType) {
+    public int updateAlarmLimitType(AlarmLimitType alarmLimitType) {
         alarmLimitType.setUpdateTime(DateUtils.getNowDate());
-        LambdaQueryWrapper<LimitType> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(LimitType::getLimitCode,alarmLimitType.getLimitCode());
-        final List<LimitType> alarmLimitTypes = alarmLimitTypeMapper.selectList(queryWrapper);
-        if(CollectionUtils.isNotEmpty(alarmLimitTypes)){
-            final String id = alarmLimitTypes.get(0).getId();
+        LambdaQueryWrapper<AlarmLimitType> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(AlarmLimitType::getLimitCode,alarmLimitType.getLimitCode());
+        final List<AlarmLimitType> alarmAlarmLimitTypes = alarmLimitTypeMapper.selectList(queryWrapper);
+        if(CollectionUtils.isNotEmpty(alarmAlarmLimitTypes)){
+            final String id = alarmAlarmLimitTypes.get(0).getId();
             if(!id.equals(alarmLimitType.getId())) {
                 throw new RuntimeException("限制值类型编号不能重复");
             }
@@ -64,15 +60,15 @@ public class AlarmLimitTypeServiceImpl implements IAlarmLimitTypeService {
     }
 
     @Override
-    public LimitType selectAlarmLimitTypeById(String id) {
+    public AlarmLimitType selectAlarmLimitTypeById(String id) {
         return alarmLimitTypeMapper.selectLimitTypeById(id);
     }
 
     @Override
-    public Page<LimitType> selectAlarmLimitTypePage(LimitType alarmLimitType, Long pageNum, Long pageSize) {
-        LambdaQueryWrapper<LimitType> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotEmpty(alarmLimitType.getLimitName()),LimitType::getLimitName,alarmLimitType.getLimitName());
-        queryWrapper.orderByDesc(LimitType::getCreateTime);
+    public Page<AlarmLimitType> selectAlarmLimitTypePage(AlarmLimitType alarmLimitType, Long pageNum, Long pageSize) {
+        LambdaQueryWrapper<AlarmLimitType> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotEmpty(alarmLimitType.getLimitName()), AlarmLimitType::getLimitName,alarmLimitType.getLimitName());
+        queryWrapper.orderByDesc(AlarmLimitType::getCreateTime);
         return alarmLimitTypeMapper.selectPage(new Page<>(pageNum,pageSize),queryWrapper);
     }
 }

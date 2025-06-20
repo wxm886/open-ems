@@ -3,24 +3,22 @@ package com.zhitan.powerDistribution.services.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhitan.basicdata.domain.MeterImplement;
-import com.zhitan.basicdata.mapper.MeterImplementMapper;
+import com.zhitan.meter.mapper.MeterImplementMapper;
 import com.zhitan.common.utils.StringUtils;
 import com.zhitan.powerDistribution.domain.PowerDistribution;
 import com.zhitan.powerDistribution.mapper.PowerDistributionMapper;
 import com.zhitan.powerDistribution.services.IPowerDistributionService;
-import org.apache.commons.collections4.CollectionUtils;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class PowerDistributionServiceImpl extends ServiceImpl<PowerDistributionMapper, PowerDistribution> implements IPowerDistributionService {
-
-    @Resource
-    private MeterImplementMapper meterImplementMapper;
 
     @Override
     public List<PowerDistribution> selectPowerDistributionList(PowerDistribution powerDistribution) {

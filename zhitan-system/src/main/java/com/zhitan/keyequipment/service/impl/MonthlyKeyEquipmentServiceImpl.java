@@ -3,6 +3,7 @@ package com.zhitan.keyequipment.service.impl;
 import com.zhitan.keyequipment.domain.MonthlyKeyEquipment;
 import com.zhitan.keyequipment.mapper.MonthlyKeyEquipmentMapper;
 import com.zhitan.keyequipment.service.IMonthlyKeyEquipmentService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,12 @@ import java.util.List;
 /**
  *重点设备能耗统计 月
  *
- * @author sys
- * @date 2021-01-11
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public class MonthlyKeyEquipmentServiceImpl implements IMonthlyKeyEquipmentService {
-    @Autowired
+
     private MonthlyKeyEquipmentMapper monthlyKeyEquipmentMapper;
 
     @Override

@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 /**
  * 各能源类型值同比、环比VO
  *
- * @Author: Zhujw
- * @Date: 2023/2/8
  */
 @Data
 public class EnergyTypeValueContrastedVO {

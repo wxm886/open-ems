@@ -1,9 +1,11 @@
 package com.zhitan.realtimedata.domain;
 
 import com.zhitan.common.enums.Quality;
+import lombok.Data;
 
 import java.util.Date;
 
+@Data
 public class TagValueResult {
 
   /**
@@ -33,59 +35,4 @@ public class TagValueResult {
    */
   private String meteName;
 
-  public String getTagCode() {
-    return tagCode;
-  }
-
-  public void setTagCode(String tagCode) {
-    this.tagCode = tagCode;
-  }
-
-  public String getTagName() {
-    return tagName;
-  }
-
-  public void setTagName(String tagName) {
-    this.tagName = tagName;
-  }
-
-  public String getUnitId() {
-    return unitId;
-  }
-
-  public void setUnitId(String unitId) {
-    this.unitId = unitId;
-  }
-
-  public Date getDataTime() {
-    return dataTime;
-  }
-
-  public void setDataTime(Date dataTime) {
-    this.dataTime = dataTime;
-  }
-
-  public Double getValue() {
-    return value;
-  }
-
-  public void setValue(Double value) {
-    this.value = value;
-  }
-
-  public Quality getQuality() {
-    return quality;
-  }
-
-  public void setQuality(Quality quality) {
-    this.quality = quality;
-  }
-
-  public String getMeteName() {
-    return meteName;
-  }
-
-  public void setMeteName(String meteName) {
-    this.meteName = meteName;
-  }
 }

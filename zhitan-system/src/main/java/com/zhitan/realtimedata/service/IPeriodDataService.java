@@ -4,7 +4,7 @@ package com.zhitan.realtimedata.service;
 import com.zhitan.common.enums.Quality;
 import com.zhitan.common.enums.StatisticType;
 import com.zhitan.common.enums.TimeType;
-import com.zhitan.realtimedata.domain.DataItem;
+import com.zhitan.realtimedata.domain.EnergyUsed;
 import com.zhitan.realtimedata.domain.ElectricityDataDetail;
 import com.zhitan.realtimedata.domain.StatisticResult;
 
@@ -21,7 +21,7 @@ public interface IPeriodDataService {
      *
      * @param data 指标数据
      */
-    void save(DataItem data);
+    void save(EnergyUsed data);
 
     /**
      * 尖峰平谷
@@ -31,9 +31,9 @@ public interface IPeriodDataService {
     /**
      * 批量保存周期数据.
      *
-     * @param dataItems 要保存的数据集合
+     * @param energyUseds 要保存的数据集合
      */
-    void save(List<DataItem> dataItems);
+    void save(List<EnergyUsed> energyUseds);
 
     void saveTOUData(List<ElectricityDataDetail> dataItems);
 
@@ -41,16 +41,16 @@ public interface IPeriodDataService {
      * 批量保存数据，不处理异常
      * 采用merge保存数据，如果批量保存失败跑出异常
      *
-     * @param dataItems
+     * @param energyUseds
      */
-    void savePeriodData(List<DataItem> dataItems);
+    void savePeriodData(List<EnergyUsed> energyUseds);
 
     /**
      * 修改指标数据.
      *
      * @param data 指标数据
      */
-    void update(DataItem data);
+    void update(EnergyUsed data);
 
     /**
      * 获取指标数据.
@@ -58,7 +58,7 @@ public interface IPeriodDataService {
      * @param indexId  计算指标
      * @param timeCode 时间编码
      */
-    DataItem getDataByIndex(String indexId, String timeCode);
+    EnergyUsed getDataByIndex(String indexId, String timeCode);
 
     /**
      * 获取指标某一时刻的数据.
@@ -67,7 +67,7 @@ public interface IPeriodDataService {
      * @param dataTime 时间
      * @param timeType 周期类型
      */
-    DataItem getDataByIndex(String indexId, Date dataTime, TimeType timeType);
+    EnergyUsed getDataByIndex(String indexId, Date dataTime, TimeType timeType);
 
     /**
      * 获取计算指标数据.
@@ -76,7 +76,7 @@ public interface IPeriodDataService {
      * @param timeCode 时间编号
      * @return 计算指标数据
      */
-    List<DataItem> getDataItemsByIndex(List<String> indexIds, String timeCode);
+    List<EnergyUsed> getDataItemsByIndex(List<String> indexIds, String timeCode);
 
     /**
      * 获取计算指标数据.
@@ -86,9 +86,9 @@ public interface IPeriodDataService {
      * @param timeType 周期类型
      * @return 计算指标数据
      */
-    List<DataItem> getDataItemsByIndex(List<String> indexIds,
-                                       Date dataTime,
-                                       TimeType timeType);
+    List<EnergyUsed> getDataItemsByIndex(List<String> indexIds,
+                                         Date dataTime,
+                                         TimeType timeType);
 
     /**
      * 获取指标某一时刻的数据.
@@ -98,10 +98,10 @@ public interface IPeriodDataService {
      * @param endTime   结束时间
      * @param timeType  周期类型
      */
-    List<DataItem> getDataItemsByIndex(List<String> indexIds,
-                                       Date beginTime,
-                                       Date endTime,
-                                       TimeType timeType);
+    List<EnergyUsed> getDataItemsByIndex(List<String> indexIds,
+                                         Date beginTime,
+                                         Date endTime,
+                                         TimeType timeType);
 
     /**
      * 获取指标某一时刻的数据.
@@ -111,10 +111,10 @@ public interface IPeriodDataService {
      * @param endTime   结束时间
      * @param timeType  周期类型
      */
-    List<DataItem> getDataItemsByIndex(String indexId,
-                                       Date beginTime,
-                                       Date endTime,
-                                       TimeType timeType);
+    List<EnergyUsed> getDataItemsByIndex(String indexId,
+                                         Date beginTime,
+                                         Date endTime,
+                                         TimeType timeType);
 
     /**
      * 获取指标某一时刻的数据.
@@ -124,11 +124,11 @@ public interface IPeriodDataService {
      * @param endTime   结束时间
      * @param timeType  周期类型
      */
-    List<DataItem> getDataItemsByIndex(List<String> indexIds,
-                                       Date beginTime,
-                                       Date endTime,
-                                       TimeType timeType,
-                                       Quality quality);
+    List<EnergyUsed> getDataItemsByIndex(List<String> indexIds,
+                                         Date beginTime,
+                                         Date endTime,
+                                         TimeType timeType,
+                                         Quality quality);
 
     /**
      * 获取统计数据.
@@ -154,11 +154,11 @@ public interface IPeriodDataService {
      * @param beginTime     开始时间
      * @param endTime       结束时间
      */
-    List<DataItem> dataStatisticsByIndexes(List<String> indexIds,
-                                           StatisticType statisticType,
-                                           TimeType timeType,
-                                           Date beginTime,
-                                           Date endTime);
+    List<EnergyUsed> dataStatisticsByIndexes(List<String> indexIds,
+                                             StatisticType statisticType,
+                                             TimeType timeType,
+                                             Date beginTime,
+                                             Date endTime);
 
 
     /**
@@ -185,11 +185,11 @@ public interface IPeriodDataService {
      * @param beginTime     开始时间
      * @param endTime       结束时间
      */
-    List<DataItem> dataStatisticsByCodes(List<String> indexCodes,
-                                         StatisticType statisticType,
-                                         TimeType timeType,
-                                         Date beginTime,
-                                         Date endTime);
+    List<EnergyUsed> dataStatisticsByCodes(List<String> indexCodes,
+                                           StatisticType statisticType,
+                                           TimeType timeType,
+                                           Date beginTime,
+                                           Date endTime);
 
     /**
      * 获取统计数据.
@@ -200,12 +200,12 @@ public interface IPeriodDataService {
      * @param beginTime     开始时间
      * @param endTime       结束时间
      */
-    List<DataItem> dataStatisticsByCodes(List<String> indexCodes,
-                                         StatisticType statisticType,
-                                         TimeType timeType,
-                                         Date beginTime,
-                                         Date endTime,
-                                         boolean isFilter);
+    List<EnergyUsed> dataStatisticsByCodes(List<String> indexCodes,
+                                           StatisticType statisticType,
+                                           TimeType timeType,
+                                           Date beginTime,
+                                           Date endTime,
+                                           boolean isFilter);
 
     /**
      * 统计指标本期值、上期值、同期值、最大值、最小值和平均值.
@@ -310,5 +310,5 @@ public interface IPeriodDataService {
      * @param indexCode 计算指标编码
      * @param timeCode  时间编码
      */
-    DataItem getDataByIndexCode(String indexCode, String timeCode);
+    EnergyUsed getDataByIndexCode(String indexCode, String timeCode);
 }

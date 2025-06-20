@@ -12,7 +12,6 @@ import java.util.Date;
  * 网关配置信息对象 gateway_setting
  *
  * @author ZhiTan
- * @date 2024-10-30
  */
 @TableName("gateway_setting")
 @Data

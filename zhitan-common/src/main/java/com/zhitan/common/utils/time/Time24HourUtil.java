@@ -4,8 +4,6 @@ import java.util.HashMap;
 
 /**
  * @description: 判断时间是否覆盖24小时
- * @author hph
- * @date 2022-11-14  10:52
  */
 public class Time24HourUtil {
     public static void main(String[] args) throws Exception {

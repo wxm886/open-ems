@@ -5,40 +5,39 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhitan.common.core.controller.BaseController;
 import com.zhitan.common.core.domain.AjaxResult;
 import com.zhitan.common.core.page.TableDataInfo;
-import com.zhitan.saving.domain.dto.PoliciesRegulationsDTO;
-import com.zhitan.saving.domain.dto.PoliciesRegulationsManagementPageDTO;
-import com.zhitan.saving.domain.vo.PoliciesRegulationsManagementDetailVO;
-import com.zhitan.saving.domain.vo.PoliciesRegulationsManagementPageVO;
-import com.zhitan.saving.service.IPoliciesRegulationsManagementService;
+import com.zhitan.saving.domain.dto.PolicyDTO;
+import com.zhitan.saving.domain.dto.PolicyPageDTO;
+import com.zhitan.saving.domain.vo.PolicyDetailVO;
+import com.zhitan.saving.domain.vo.PolicyPageVO;
+import com.zhitan.saving.service.IPolicyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * 政策法规Controller
  *
- * @author ZhiTan
- * @date 2024-12-26
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
 @Api(tags = "政策法规管理")
 @RequestMapping("/policiesRegulations")
 public class PoliciesRegulationsManagementController extends BaseController {
 
-    @Resource
-    private IPoliciesRegulationsManagementService policiesRegulationsService;
-
+    private IPolicyService policiesRegulationsService;
 
     /**
      * 政策法规-列表查询
      */
     @GetMapping("/page")
     @ApiOperation(value = "分页列表")
-    public TableDataInfo page(PoliciesRegulationsManagementPageDTO pageDTO) {
-        Page<PoliciesRegulationsManagementPageVO> responsePage = policiesRegulationsService.getPageList(pageDTO);
+    public TableDataInfo page(PolicyPageDTO pageDTO) {
+        Page<PolicyPageVO> responsePage = policiesRegulationsService.getPageList(pageDTO);
         return getDataTable(responsePage);
     }
 
@@ -48,7 +47,7 @@ public class PoliciesRegulationsManagementController extends BaseController {
     @GetMapping("/detail")
     @ApiOperation(value = "查询详情")
     public AjaxResult page(@RequestParam("id") Long id) {
-        PoliciesRegulationsManagementDetailVO responsePage = policiesRegulationsService.getDetail(id);
+        PolicyDetailVO responsePage = policiesRegulationsService.getDetail(id);
         return success(responsePage);
     }
 
@@ -57,7 +56,7 @@ public class PoliciesRegulationsManagementController extends BaseController {
      */
     @PostMapping("/add")
     @ApiOperation(value = "新增")
-    public AjaxResult add(@RequestBody @Validated PoliciesRegulationsDTO addDTO) {
+    public AjaxResult add(@RequestBody @Validated PolicyDTO addDTO) {
         policiesRegulationsService.add(addDTO);
         return success();
     }
@@ -67,7 +66,7 @@ public class PoliciesRegulationsManagementController extends BaseController {
      */
     @PostMapping("/edit")
     @ApiOperation(value = "更新")
-    public AjaxResult edit(@RequestBody @Validated PoliciesRegulationsDTO editDTO) {
+    public AjaxResult edit(@RequestBody @Validated PolicyDTO editDTO) {
         policiesRegulationsService.edit(editDTO);
         return success();
     }

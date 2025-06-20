@@ -5,9 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * @Description: TODO
- * @author: yxw
- * @date: 2022年05月06日 14:02
+ * @Description:
  */
 @Data
 public class ElectricThreePhaseTempModel {

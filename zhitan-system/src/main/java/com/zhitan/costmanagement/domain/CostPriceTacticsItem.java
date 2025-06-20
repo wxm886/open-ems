@@ -15,7 +15,6 @@ import java.math.BigDecimal;
  * 【请填写功能名称】对象 cost_price_tactics_item
  *
  * @author ZhiTan
- * @date 2024-11-08
  */
 @TableName("cost_price_tactics_item")
 @Data

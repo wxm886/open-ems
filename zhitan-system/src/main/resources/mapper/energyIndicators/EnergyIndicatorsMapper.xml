@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhitan.energyIndicators.mapper.EnergyIndicatorsMapper">
 
-    <resultMap type="EnergyIndicators" id="EnergyIndicatorsResult">
+    <resultMap type="com.zhitan.energyIndicators.domain.EnergyIndicators" id="EnergyIndicatorsResult">
         <result property="nodeId"    column="node_id"    />
         <result property="timeType"    column="time_type"    />
         <result property="dataTime"    column="data_time"    />
@@ -28,7 +28,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                energy_type, indicators_type, energy_indicators_id, node_name from energy_indicators
     </sql>
 
-    <select id="selectEnergyIndicatorsList" parameterType="EnergyIndicators" resultMap="EnergyIndicatorsResult">
+    <select id="selectEnergyIndicatorsList" parameterType="com.zhitan.energyIndicators.domain.EnergyIndicators" resultMap="EnergyIndicatorsResult">
         <include refid="selectEnergyIndicatorsVo"/>
         <where>
             <if test="nodeId != null  and nodeId != ''"> and node_id = #{nodeId}</if>
@@ -49,7 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where energy_indicators_id = #{nodeId}
     </select>
 
-    <insert id="insertEnergyIndicators" parameterType="EnergyIndicators">
+    <insert id="insertEnergyIndicators" parameterType="com.zhitan.energyIndicators.domain.EnergyIndicators">
         insert into energy_indicators
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="nodeId != null">node_id,</if>
@@ -89,7 +89,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateEnergyIndicators" parameterType="EnergyIndicators">
+    <update id="updateEnergyIndicators" parameterType="com.zhitan.energyIndicators.domain.EnergyIndicators">
         update energy_indicators
         <trim prefix="SET" suffixOverrides=",">
             <if test="timeType != null">time_type = #{timeType},</if>

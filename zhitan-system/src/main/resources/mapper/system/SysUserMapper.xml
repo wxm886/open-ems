@@ -23,6 +23,7 @@
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
         <result property="remark" column="remark"/>
+        <result property="trialExpireTime" column="trial_expire_time"/>
         <result property="singleUser" column="single_user"/>
         <association property="dept" javaType="com.zhitan.common.core.domain.entity.SysDept" resultMap="deptResult"/>
         <collection property="roles" javaType="java.util.List" resultMap="RoleResult"/>
@@ -71,6 +72,7 @@
                d.dept_name,
                d.order_num,
                d.leader,
+               u.trial_expire_time,
                d.status as dept_status,
                r.role_id,
                r.role_name,
@@ -145,7 +147,8 @@
           and del_flag = '0' limit 1
     </select>
 
-    <select id="selectAllocatedList" parameterType="com.zhitan.common.core.domain.entity.SysUser" resultMap="SysUserResult">
+    <select id="selectAllocatedList" parameterType="com.zhitan.common.core.domain.entity.SysUser"
+            resultMap="SysUserResult">
         select distinct u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phone_number, u.status, u.create_time
         from sys_user u
         left join sys_dept d on u.dept_id = d.dept_id
@@ -162,7 +165,8 @@
         ${params.dataScope}
     </select>
 
-    <select id="selectUnallocatedList" parameterType="com.zhitan.common.core.domain.entity.SysUser" resultMap="SysUserResult">
+    <select id="selectUnallocatedList" parameterType="com.zhitan.common.core.domain.entity.SysUser"
+            resultMap="SysUserResult">
         select distinct u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phone_number, u.status, u.create_time
         from sys_user u
         left join sys_dept d on u.dept_id = d.dept_id
@@ -181,7 +185,8 @@
         ${params.dataScope}
     </select>
 
-    <insert id="insertUser" parameterType="com.zhitan.common.core.domain.entity.SysUser" useGeneratedKeys="true" keyProperty="userId">
+    <insert id="insertUser" parameterType="com.zhitan.common.core.domain.entity.SysUser" useGeneratedKeys="true"
+            keyProperty="userId">
         insert into sys_user(
         <if test="userId != null and userId != 0">user_id,</if>
         <if test="deptId != null and deptId != 0">dept_id,</if>
@@ -196,6 +201,7 @@
         <if test="createBy != null and createBy != ''">create_by,</if>
         <if test="remark != null and remark != ''">remark,</if>
         <if test="singleUser != null and singleUser != ''">single_user,</if>
+        <if test="trialExpireTime != null">trial_expire_time,</if>
         create_time
         )values(
         <if test="userId != null and userId != ''">#{userId},</if>
@@ -211,6 +217,7 @@
         <if test="createBy != null and createBy != ''">#{createBy},</if>
         <if test="remark != null and remark != ''">#{remark},</if>
         <if test="singleUser != null and singleUser != ''">#{singleUser},</if>
+        <if test="trialExpireTime != null">#{trialExpireTime},</if>
         now()
         )
     </insert>
@@ -232,6 +239,7 @@
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="singleUser != null and singleUser != ''">single_user = #{singleUser},</if>
+            <if test="trialExpireTime != null">trial_expire_time = #{trialExpireTime},</if>
             update_time = now()
         </set>
         where user_id = #{userId}

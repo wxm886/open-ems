@@ -9,8 +9,7 @@ import java.math.BigDecimal;
 /**
  * description 尖峰平谷柱状图
  *
- * @author hmj
- * @date 2024-09-24 16:32
+ * @author zhitan
  */
 @Getter
 @Setter

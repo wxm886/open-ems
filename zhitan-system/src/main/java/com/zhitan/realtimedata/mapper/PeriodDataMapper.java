@@ -3,9 +3,10 @@ package com.zhitan.realtimedata.mapper;
 import com.zhitan.common.enums.Quality;
 import com.zhitan.common.enums.StatisticType;
 import com.zhitan.common.enums.TimeType;
-import com.zhitan.realtimedata.domain.DataItem;
+import com.zhitan.realtimedata.domain.EnergyUsed;
 import com.zhitan.realtimedata.domain.ElectricityDataDetail;
 import com.zhitan.realtimedata.domain.StatisticResult;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -15,28 +16,29 @@ import java.util.Map;
 /**
  * 阶段数据查询，数据访问接口.
  */
+@Mapper
 public interface PeriodDataMapper {
 
-    void save(@Param("dataItem") DataItem dataItem);
+    void save(@Param("dataItem") EnergyUsed energyUsed);
 
-    void insert(@Param("dataItem") DataItem dataItem);
+    void insert(@Param("dataItem") EnergyUsed energyUsed);
 
     void insertTOUData(@Param("dataItem") ElectricityDataDetail dataItem);
 
     void insertTOUDataItems(@Param("dataItems") List<ElectricityDataDetail> dataItems);
 
-    void update(@Param("dataItem") DataItem dataItem);
+    void update(@Param("dataItem") EnergyUsed energyUsed);
 
-    DataItem getDataByIndex(@Param("indexId") String indexId,
-                            @Param("timeCode") String timeCode);
+    EnergyUsed getDataByIndex(@Param("indexId") String indexId,
+                              @Param("timeCode") String timeCode);
 
-    List<DataItem> getDatasByIndex(@Param("indexIds") List<String> indexIds,
-                                   @Param("timeCode") String timeCode);
+    List<EnergyUsed> getDatasByIndex(@Param("indexIds") List<String> indexIds,
+                                     @Param("timeCode") String timeCode);
 
-    List<DataItem> getPeriodDatasByIndex(@Param("indexIds") List<String> indexIds,
-                                         @Param("beginTime") Date beginTime,
-                                         @Param("endTime") Date endTime,
-                                         @Param("timeType") TimeType timeType);
+    List<EnergyUsed> getPeriodDatasByIndex(@Param("indexIds") List<String> indexIds,
+                                           @Param("beginTime") Date beginTime,
+                                           @Param("endTime") Date endTime,
+                                           @Param("timeType") TimeType timeType);
 
     Double dataStatisticsByIndex(@Param("indexId") String indexId,
                                  @Param("statisticType") StatisticType statisticType,
@@ -44,22 +46,22 @@ public interface PeriodDataMapper {
                                  @Param("beginTime") Date beginTime,
                                  @Param("endTime") Date endTime);
 
-    List<DataItem> dataStatisticsByIndexs(@Param("indexIds") List<String> indexIds,
-                                          @Param("statisticType") StatisticType
+    List<EnergyUsed> dataStatisticsByIndexs(@Param("indexIds") List<String> indexIds,
+                                            @Param("statisticType") StatisticType
                                                   statisticType,
-                                          @Param("timeType") TimeType timeType,
-                                          @Param("beginTime") Date beginTime,
-                                          @Param("endTime") Date endTime);
+                                            @Param("timeType") TimeType timeType,
+                                            @Param("beginTime") Date beginTime,
+                                            @Param("endTime") Date endTime);
 
-    List<DataItem> statistic(@Param("indexIds") List<String> indexIds,
-                             @Param("timeType") TimeType timeType,
-                             @Param("beginTime") Date beginTime,
-                             @Param("endTime") Date endTime);
+    List<EnergyUsed> statistic(@Param("indexIds") List<String> indexIds,
+                               @Param("timeType") TimeType timeType,
+                               @Param("beginTime") Date beginTime,
+                               @Param("endTime") Date endTime);
 
-    List<DataItem> statisticByCode(@Param("indexCodes") List<String> indexCodes,
-                                   @Param("timeType") TimeType timeType,
-                                   @Param("beginTime") Date beginTime,
-                                   @Param("endTime") Date endTime);
+    List<EnergyUsed> statisticByCode(@Param("indexCodes") List<String> indexCodes,
+                                     @Param("timeType") TimeType timeType,
+                                     @Param("beginTime") Date beginTime,
+                                     @Param("endTime") Date endTime);
 
     List<StatisticResult> getStatisticDatasById(@Param("indexIds") List<String> indexIds,
                                                 @Param("timeType") TimeType timeType);
@@ -67,38 +69,38 @@ public interface PeriodDataMapper {
     List<StatisticResult> getStatisticDatasByCode(@Param("indexCodes") List<String> indexCodes,
                                                   @Param("timeType") TimeType timeType);
 
-    List<DataItem> dataStatisticsByCodes(@Param("indexCodes") List<String> indexCodes,
-                                         @Param("statisticType") StatisticType statisticType,
-                                         @Param("timeType") TimeType timeType,
-                                         @Param("beginTime") Date beginTime,
-                                         @Param("endTime") Date endTime);
+    List<EnergyUsed> dataStatisticsByCodes(@Param("indexCodes") List<String> indexCodes,
+                                           @Param("statisticType") StatisticType statisticType,
+                                           @Param("timeType") TimeType timeType,
+                                           @Param("beginTime") Date beginTime,
+                                           @Param("endTime") Date endTime);
 
     String hasExist(@Param("indexId") String indexId,
                     @Param("timeCode") String timeCode);
 
-    void saveDataList(@Param("dataItemVlues") List<DataItem> datas);
+    void saveDataList(@Param("dataItemVlues") List<EnergyUsed> datas);
 
-    List<DataItem> getPeriodDatasByIndexAndQuality(@Param("indexIds") List<String> indexIds,
-                                                   @Param("beginTime") Date beginTime,
-                                                   @Param("endTime") Date endTime,
-                                                   @Param("timeType") TimeType timeType,
-                                                   @Param("quality") Quality quality);
+    List<EnergyUsed> getPeriodDatasByIndexAndQuality(@Param("indexIds") List<String> indexIds,
+                                                     @Param("beginTime") Date beginTime,
+                                                     @Param("endTime") Date endTime,
+                                                     @Param("timeType") TimeType timeType,
+                                                     @Param("quality") Quality quality);
 
-    List<DataItem> dataStatisticsFilterByCodes(@Param("indexCodes") List<String> indexCodes,
-                                               @Param("statisticType") StatisticType statisticType,
-                                               @Param("timeType") TimeType timeType,
-                                               @Param("beginTime") Date beginTime,
-                                               @Param("endTime") Date endTime,
-                                               @Param("isFilter") boolean isFilter);
+    List<EnergyUsed> dataStatisticsFilterByCodes(@Param("indexCodes") List<String> indexCodes,
+                                                 @Param("statisticType") StatisticType statisticType,
+                                                 @Param("timeType") TimeType timeType,
+                                                 @Param("beginTime") Date beginTime,
+                                                 @Param("endTime") Date endTime,
+                                                 @Param("isFilter") boolean isFilter);
 
     void delete(@Param("indexId") String indexId,
                 @Param("timeType") TimeType timeType,
                 @Param("beginTime") Date beginTime,
                 @Param("endTime") Date endTime);
 
-    DataItem getDataByIndexCode(String indexCode, String timeCode);
+    EnergyUsed getDataByIndexCode(String indexCode, String timeCode);
 
     List<String> queryDataItemIsExist(@Param("queryMap") Map<String, List<String>> queryMap);
 
-    void insertDataList(List<DataItem> insertData);
+    void insertDataList(List<EnergyUsed> insertData);
 }

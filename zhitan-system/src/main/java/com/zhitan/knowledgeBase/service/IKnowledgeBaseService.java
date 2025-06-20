@@ -11,9 +11,6 @@ import com.zhitan.knowledgeBase.domain.vo.KnowledgeBasePageVO;
 
 /**
  * 知识库(KnowledgeBase)表服务接口
- *
- * @author makejava
- * @since 2025-01-10 15:05:27
  */
 public interface IKnowledgeBaseService extends IService<KnowledgeBase> {
 

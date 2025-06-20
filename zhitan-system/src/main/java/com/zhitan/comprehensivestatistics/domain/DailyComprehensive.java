@@ -11,8 +11,7 @@ import java.util.Map;
 
 /**
  * 
- * @author sys
- * @date 2020-03-25
+ * @author zhitan
  */
 @Data
 public class DailyComprehensive implements Serializable {

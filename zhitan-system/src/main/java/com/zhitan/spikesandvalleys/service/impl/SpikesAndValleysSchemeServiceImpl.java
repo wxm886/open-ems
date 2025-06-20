@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.zhitan.alarm.domain.LimitType;
 import com.zhitan.common.utils.DateUtils;
 import com.zhitan.common.utils.StringUtils;
 import com.zhitan.spikesandvalleys.domain.SpikesAndValleysItem;
@@ -20,7 +19,8 @@ import com.zhitan.spikesandvalleys.domain.vo.SpikesAndValleysSchemeVo;
 import com.zhitan.spikesandvalleys.mapper.SpikesAndValleysItemMapper;
 import com.zhitan.spikesandvalleys.mapper.SpikesAndValleysSchemeMapper;
 import com.zhitan.spikesandvalleys.service.ISpikesAndValleysSchemeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
  * 尖峰平谷时间段明细Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-10-29
  */
+@Slf4j
 @Service
+@AllArgsConstructor
 public class SpikesAndValleysSchemeServiceImpl extends ServiceImpl<SpikesAndValleysSchemeMapper, SpikesAndValleysScheme> implements ISpikesAndValleysSchemeService {
-    @Autowired
+
     private SpikesAndValleysSchemeMapper spikesAndValleysSchemeMapper;
-    @Autowired
+
     private SpikesAndValleysItemMapper spikesAndValleysItemMapper;
     /**
      * 查询尖峰平谷时间段明细
@@ -163,14 +164,4 @@ public class SpikesAndValleysSchemeServiceImpl extends ServiceImpl<SpikesAndVall
         return spikesAndValleysSchemeMapper.deleteSpikesAndValleysSchemeByIds(ids);
     }
 
-    /**
-     * 删除尖峰平谷时间段明细信息
-     *
-     * @param id 尖峰平谷时间段明细主键
-     * @return 结果
-     */
-    @Override
-    public int deleteSpikesAndValleysSchemeById(String id) {
-        return spikesAndValleysSchemeMapper.deleteSpikesAndValleysSchemeById(id);
-    }
 }

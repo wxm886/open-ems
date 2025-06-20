@@ -5,8 +5,6 @@ import com.zhitan.common.constant.CommonConst;
 
 /**
  * @Description: 字符串工具类
- * @author: yxw
- * @date: 2022年02月02日 12:27
  */
 public class StringUtil {
     /**

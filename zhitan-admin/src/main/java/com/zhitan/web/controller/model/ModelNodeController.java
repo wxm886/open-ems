@@ -9,14 +9,16 @@ import com.zhitan.common.enums.BusinessType;
 import com.zhitan.common.utils.SecurityUtils;
 import com.zhitan.common.utils.poi.ExcelUtil;
 import com.zhitan.common.utils.uuid.UUID;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.model.domain.ModelNode;
-import com.zhitan.model.service.IEnergyIndexService;
+import com.zhitan.model.service.IMeterPointService;
 import com.zhitan.model.service.IModelNodeService;
 import com.zhitan.system.service.ISysRoleService;
 import com.zhitan.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,24 +28,17 @@ import java.util.List;
 /**
  * 模型节点Controller
  *
- * @author fanxinfu
- * @date 2020-02-10
+ * @author zhitan
  */
+@Slf4j
 @RestController
+@AllArgsConstructor
 @RequestMapping("/basicsetting/modelnode")
 @Api(value = "模型节点",tags = {"模型节点"})
 public class ModelNodeController extends BaseController {
 
-  private final IModelNodeService modelNodeService;
+  private IModelNodeService modelNodeService;
 
-
-  @Autowired
-  public ModelNodeController(
-      IModelNodeService modelNodeService, IEnergyIndexService energyIndexService,
-      ISysUserService sysUserService,
-      ISysRoleService roleService) {
-    this.modelNodeService = modelNodeService;
-  }
 
   /**
    * 查询模型节点列表
@@ -359,7 +354,7 @@ public class ModelNodeController extends BaseController {
   @ApiOperation(value = "根据nodeId查询点位信息")
   public AjaxResult getIndexInforByNodeId(String nodeId) {
     try {
-      List<EnergyIndex> settingIndex = modelNodeService.getSettingIndex(nodeId);
+      List<MeterPoint> settingIndex = modelNodeService.getSettingIndex(nodeId);
 
 
       return AjaxResult.success();

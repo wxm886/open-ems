@@ -8,10 +8,9 @@ import com.zhitan.home.domain.vo.HomePeakValleyVO;
 import java.util.List;
 
 /**
- * description todu
+ * description
  *
- * @author hmj
- * @date 2024-10-31 18:07
+ * @author
  */
 public interface IHomePageService {
     List<HomeEnergyStatisticsVO> energyConsumptionSummation(String timeType, String modelcode);

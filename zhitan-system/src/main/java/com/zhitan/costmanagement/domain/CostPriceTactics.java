@@ -13,7 +13,6 @@ import com.zhitan.common.annotation.Excel;
  * 成本策略对象 cost_price_tactics
  *
  * @author ZhiTan
- * @date 2024-11-08
  */
 @TableName("cost_price_tactics")
 @Data

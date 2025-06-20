@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
  * 系统名称配置Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-11-05
  */
 @Service
 public class SysNameConfigServiceImpl extends ServiceImpl<SysNameConfigMapper, SysNameConfig> implements ISysNameConfigService {

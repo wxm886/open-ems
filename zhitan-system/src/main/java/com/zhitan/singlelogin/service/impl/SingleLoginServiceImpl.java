@@ -23,8 +23,7 @@ import java.util.Date;
 /**
  * description todu
  *
- * @author hmj
- * @date 2024-11-15 17:10
+ * @author zhitan
  */
 @Component
 public class SingleLoginServiceImpl implements ISingleLoginService {

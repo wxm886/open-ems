@@ -3,9 +3,7 @@ package com.zhitan.common.constant;
 import java.math.BigDecimal;
 
 /**
- * @Description: 常量封装
- * @author: yxw
- * @date: 2022年02月02日 11:37
+ * 常量封装
  */
 public class CommonConst {
     /**
@@ -919,11 +917,11 @@ public class CommonConst {
     /**
      * 能源计算类型(采集点)
      */
-    public static final String ENERGY_INDEX_TYPE_COLLECT = "COLLECT";
+    public static final String DEVICE_POINT_TYPE_COLLECT = "COLLECT";
     /**
      * 能源类型(计算点)
      */
-    public static final String ENERGY_INDEX_TYPE_CALCULATE = "CALCULATE";
+    public static final String DEVICE_POINT_TYPE_CALCULATE = "CALCULATE";
     /**
      * 总
      */

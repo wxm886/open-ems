@@ -6,6 +6,7 @@ import com.zhitan.common.utils.DateTimeUtil;
 import com.zhitan.comprehensivestatistics.domain.YearComperhensive;
 import com.zhitan.comprehensivestatistics.mapper.YearComprehensiveMapper;
 import com.zhitan.comprehensivestatistics.service.IyearComprehensive;
+import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,12 +19,11 @@ import java.util.stream.Collectors;
 /**
  * 业务层处理
  * 
- * @author sys
- * @date 2020-03-25
+ * @author zhitan
  */
 @Service
+@AllArgsConstructor
 public class YearComprehensiveServiceImpl implements IyearComprehensive {
-    @Resource
     private YearComprehensiveMapper yearMapper;
 
     @Override

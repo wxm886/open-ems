@@ -7,6 +7,8 @@ import com.zhitan.common.core.domain.entity.SysUser;
 import com.zhitan.common.utils.StringUtils;
 import com.zhitan.framework.web.service.SysLoginService;
 import com.zhitan.singlelogin.service.ISingleLoginService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,14 +20,13 @@ import javax.annotation.Resource;
  *
  * @author zhitan
  */
+@Slf4j
 @RestController
-public class SingleLoginController
-{
-    @Resource
+@AllArgsConstructor
+public class SingleLoginController {
     private ISingleLoginService singleLoginService;
-
-    @Resource
     private SysLoginService loginService;
+
     /**
      * 登录方法
      *
@@ -34,19 +35,18 @@ public class SingleLoginController
      */
     @Anonymous
     @GetMapping("/singleLogin")
-    public AjaxResult singleLogin(@RequestParam String token)
-    {
+    public AjaxResult singleLogin(@RequestParam String token) {
         AjaxResult ajax = AjaxResult.success();
-        if(StringUtils.isEmpty(token)){
+        if (StringUtils.isEmpty(token)) {
             return AjaxResult.error("token不能为空");
         }
         SysUser user = singleLoginService.singleLogin(token);
-        if(null == user){
+        if (null == user) {
             return AjaxResult.error("登录失败");
         }
         // 生成令牌
-        String newtoken = loginService.loginNoCode(user.getUserName());
-        ajax.put(Constants.TOKEN, newtoken);
+        String newToken = loginService.loginNoCode(user.getUserName());
+        ajax.put(Constants.TOKEN, newToken);
         return ajax;
     }
 

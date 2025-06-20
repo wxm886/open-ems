@@ -3,6 +3,7 @@ package com.zhitan.costmanagement.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import java.util.List;
         import com.zhitan.common.utils.DateUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.zhitan.costmanagement.mapper.CostPriceTacticsItemMapper;
@@ -13,11 +14,11 @@ import com.zhitan.costmanagement.service.ICostPriceTacticsItemService;
  * 【请填写功能名称】Service业务层处理
  *
  * @author ZhiTan
- * @date 2024-11-08
  */
 @Service
+@AllArgsConstructor
 public class CostPriceTacticsItemServiceImpl extends ServiceImpl<CostPriceTacticsItemMapper, CostPriceTacticsItem> implements ICostPriceTacticsItemService {
-    @Autowired
+
     private CostPriceTacticsItemMapper costPriceTacticsItemMapper;
 
     /**

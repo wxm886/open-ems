@@ -2,14 +2,15 @@ package com.zhitan.model.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhitan.basicdata.domain.MeterImplement;
+import com.zhitan.basicdata.domain.Product;
 import com.zhitan.basicdata.domain.SysEnergy;
-import com.zhitan.basicdata.domain.SysProduct;
 import com.zhitan.common.enums.TimeType;
-import com.zhitan.dataitem.domain.vo.NodeIndexValueVO;
-import com.zhitan.model.domain.EnergyIndex;
+import com.zhitan.energyUsed.domain.vo.NodePointValueVO;
+import com.zhitan.meter.domain.Meter;
+import com.zhitan.model.domain.MeterPoint;
 import com.zhitan.model.domain.ModelNode;
-import com.zhitan.model.domain.vo.ModelNodeIndexInfo;
+import com.zhitan.model.domain.vo.MeterPointVO;
+import com.zhitan.model.domain.vo.ModelNodePointInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
@@ -19,10 +20,9 @@ import java.util.Map;
 /**
  * 模型节点Mapper接口
  *
- * @author fanxinfu
- * @date 2020-02-10
+ * @author zhitan
  */
-public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
+public interface ModelNodeMapper extends BaseMapper<ModelNode> {
 
     /**
      * 查询模型节点
@@ -87,9 +87,9 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
 
     void setDevice(@Param("nodeId") String nodeId, @Param("deviceIds") String[] deviceIds);
 
-    List<MeterImplement> getSettingDevice(String nodeId);
+    List<Meter> getSettingDevice(String nodeId);
 
-    List<EnergyIndex> getSettingIndex(String nodeId);
+    List<MeterPointVO> getSettingIndex(String nodeId);
 
 
     void delDevice(@Param("nodeId") String nodeId, @Param("deviceIds") String[] deviceIds);
@@ -100,7 +100,7 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
 
     void delEnergy(@Param("nodeId") String nodeId, @Param("energyIds") Integer[] energyIds);
 
-    List<SysProduct> getSettingProduct(String nodeId);
+    List<Product> getSettingProduct(String nodeId);
 
     void setProduct(@Param("nodeId") String nodeId, @Param("productIds") Integer[] productIds);
 
@@ -111,18 +111,16 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
 
     void delIndex(@Param("nodeId") String nodeId, @Param("indexIds") String[] indexIds);
 
-    Page<EnergyIndex> getSettingIndexByType(@Param("indexType") String indexType,
-                                            @Param("nodeId") String nodeId,
-                                            @Param("code") String code,
-                                            @Param("name") String name,
-                                            @Param("page") Page<?> page);
-
-    List<ModelNode> getModelNodeByNodeCodes(List<String> nodeCodes);
+    Page<MeterPoint> getSettingIndexByType(@Param("pointType") String pointType,
+                                           @Param("nodeId") String nodeId,
+                                           @Param("code") String code,
+                                           @Param("name") String name,
+                                           @Param("page") Page<?> page);
 
     List<ModelNode> getModelNodeByModelCodeWithAuth(@Param("modelCode") String modelCode,
                                                     @Param("userId") String userId);
 
-    List<EnergyIndex> getSettingIndexByWhere(@Param("nodeId") String nodeId, @Param("indexName") String indexName);
+    List<MeterPoint> getSettingIndexByWhere(@Param("nodeId") String nodeId, @Param("indexName") String indexName);
 
     /**
      * 根据nodeIds获取idexId信息
@@ -138,7 +136,7 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
      * @param code
      * @return
      */
-    List<ModelNodeIndexInfo> getModelNodeIndexIdRelationInforByCode(@Param("code") String code);
+    List<ModelNodePointInfo> getModelNodeIndexIdRelationInforByCode(@Param("code") String code);
 
     /**
      * 根据nodeId查询对应详细信息
@@ -146,7 +144,7 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
      * @param nodeId
      * @return
      */
-    List<ModelNodeIndexInfo> getModelNodeIndexIdRelationInforByNodeId(@Param("nodeId") String nodeId);
+    List<ModelNodePointInfo> getModelNodeIndexIdRelationInforByNodeId(@Param("nodeId") String nodeId);
 
     /**
      * 根据父id查询详细信息
@@ -154,7 +152,7 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
      * @param parentId
      * @return
      */
-    List<ModelNodeIndexInfo> listModelNodeIndexIdRelationInforByParentId(@Param("parentId") String parentId);
+    List<ModelNodePointInfo> listModelNodeIndexIdRelationInforByParentId(@Param("parentId") String parentId);
 
     /**
      * 根据code查询父级信息
@@ -171,39 +169,37 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
      * @param nodeId    节点id
      * @return 结果
      */
-    List<ModelNodeIndexInfo> selectIndexByModelCodeAndNodeId(@Param("modelCode") String modelCode, @Param("nodeId") String nodeId);
+    List<ModelNodePointInfo> selectIndexByModelCodeAndNodeId(@Param("modelCode") String modelCode, @Param("nodeId") String nodeId);
 
-    void delIndexNodeIdAndIndexType(@Param("nodeId")String nodeId, @Param("indexType")String indexType);
+    void delIndexNodeIdAndIndexType(@Param("nodeId") String nodeId, @Param("indexType") String indexType);
 
-    void setIndexAndNodeId(@Param("nodeId")String nodeId, @Param("indexIds")String[] indexIds);
+    void setIndexAndNodeId(@Param("nodeId") String nodeId, @Param("indexIds") String[] indexIds);
 
-    List<MeterImplement> getSettingDeviceIndex(@Param("nodeId")String nodeId,@Param("energyType")String energyType);
+    List<Meter> getSettingDeviceIndex(@Param("nodeId") String nodeId, @Param("energyType") String energyType);
 
     /**
-     * @description: 根据节点id和能源类型查询点位信息
      * @param nodeId
-     * @author: hmj
-     * @date: 2024/10/16 19:16
+     * @description: 根据节点id和能源类型查询点位信息
+     * @author zhitan
      */
-    List<ModelNodeIndexInfo> getModelNodeIndexIdByNodeId(@Param("nodeId")String nodeId, @Param("energyType")String energyType);
+    List<ModelNodePointInfo> getModelNodeIndexIdByNodeId(@Param("nodeId") String nodeId, @Param("energyType") String energyType);
 
     /**
-     * @description: 根据nodeId查询子节点的所有统计指标
      * @param parentId
      * @return java.util.List<com.zhitan.model.domain.vo.ModelNodeIndexInfor>
-     * @author: hmj
-     * @date: 2024/10/18 16:12
+     * @description: 根据nodeId查询子节点的所有统计指标
+     * @author zhitan
      */
-    List<ModelNodeIndexInfo> getModelNodeByParentId(String parentId);
+    List<ModelNodePointInfo> getModelNodeByParentId(String parentId);
 
     ModelNode getFirstModeNodeInfo(String modelCode);
 
-    List<ModelNodeIndexInfo> selectIndexByNodeIds(@Param("modelCode") String modelCode, @Param("nodeIds") List<String> nodeIds);
+    List<ModelNodePointInfo> selectIndexByNodeIds(@Param("modelCode") String modelCode, @Param("nodeIds") List<String> nodeIds);
 
     /**
      * 根据父节点id和能源类型查询点位下的累积量
      */
-    List<NodeIndexValueVO> getDataItemByParentNodeId(@Param("parentId") String parentId,
+    List<NodePointValueVO> getDataItemByParentNodeId(@Param("parentId") String parentId,
                                                      @Param("energyType") String energyType,
                                                      @Param("timeType") TimeType timeType,
                                                      @Param("dateTimeMap") Map<String, LocalDateTime> dateTimeMap);
@@ -211,8 +207,13 @@ public interface ModelNodeMapper  extends BaseMapper<ModelNode> {
     /**
      * 根据节点id和能源类型查询点位下的累积量
      */
-    List<NodeIndexValueVO> getDataItemByNodeId(@Param("nodeId") String nodeId,
-                                                     @Param("energyType") String energyType,
-                                                     @Param("timeType") TimeType timeType,
-                                                     @Param("dateTimeMap") Map<String, LocalDateTime> dateTimeMap);
+    List<NodePointValueVO> getDataItemByNodeId(@Param("nodeId") String nodeId,
+                                               @Param("energyType") String energyType,
+                                               @Param("timeType") TimeType timeType,
+                                               @Param("dateTimeMap") Map<String, LocalDateTime> dateTimeMap);
+
+    /**
+     * 通过节点地址查询节点下及子节点下的所有点位信息
+     */
+    List<ModelNodePointInfo> getAllModelNodeIndexByAddress(@Param("modelCode") String modelCode, @Param("address") String address);
 }
