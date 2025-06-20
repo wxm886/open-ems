@@ -10,9 +10,9 @@ import java.util.List;
 @TableName("rule_formula")
 public class RuleFormula {
 
-  private String id;
-  private String formulaText;
-  private String pointId;
-  private Integer isPvCalc;
-  private List<RuleFormulaParam> ruleFormulaParams = new ArrayList<>();
+    private String id;
+    private String formulaText;
+    private String pointId;
+    private Integer isPvCalc;
+    private List<RuleFormulaParam> indexFormulaParams = new ArrayList<>();
 }

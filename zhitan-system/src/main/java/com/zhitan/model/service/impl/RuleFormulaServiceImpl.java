@@ -18,39 +18,39 @@ import java.util.List;
 @AllArgsConstructor
 public class RuleFormulaServiceImpl implements RuleFormulaService {
 
-  private RuleFormulaMapper ruleFormulaMapper;
+    private RuleFormulaMapper ruleFormulaMapper;
 
-  @Override
-  public void saveIndexFormula(RuleFormula ruleFormula) {
-    if (StringUtils.isEmpty(ruleFormula.getId())) {
-      ruleFormula.setId(UUID.fastUUID().toString());
-      ruleFormulaMapper.insertIndexFormula(ruleFormula);
-    } else {
-      ruleFormulaMapper.updateIndexFormula(ruleFormula);
+    @Override
+    public void saveIndexFormula(RuleFormula ruleFormula) {
+        if (StringUtils.isEmpty(ruleFormula.getId())) {
+            ruleFormula.setId(UUID.fastUUID().toString());
+            ruleFormulaMapper.insertIndexFormula(ruleFormula);
+        } else {
+            ruleFormulaMapper.updateIndexFormula(ruleFormula);
+        }
+
+        ruleFormula.getIndexFormulaParams().forEach(param -> {
+            param.setId(UUID.fastUUID().toString());
+            param.setFormulaId(ruleFormula.getId());
+            param.setPointId(ruleFormula.getPointId());
+        });
+        ruleFormulaMapper
+                .saveIndexFormulaParam(ruleFormula.getPointId(), ruleFormula.getIndexFormulaParams());
     }
 
-    ruleFormula.getRuleFormulaParams().forEach(param -> {
-      param.setId(UUID.fastUUID().toString());
-      param.setFormulaId(ruleFormula.getId());
-      param.setPointId(ruleFormula.getPointId());
-    });
-    ruleFormulaMapper
-        .saveIndexFormulaParam(ruleFormula.getPointId(), ruleFormula.getRuleFormulaParams());
-  }
+    @Override
+    public RuleFormula getIndexFormula(String indexId) {
+        RuleFormula ruleFormula = ruleFormulaMapper.getFormula(indexId);
+        if (ruleFormula != null) {
+            List<RuleFormulaParam> ruleFormulaParams = ruleFormulaMapper.getFormulaParam(indexId);
+            if (!ruleFormulaParams.isEmpty()) {
+                ruleFormula.setIndexFormulaParams(ruleFormulaParams);
+            }
+        } else {
+            ruleFormula = new RuleFormula();
+        }
 
-  @Override
-  public RuleFormula getIndexFormula(String indexId) {
-    RuleFormula ruleFormula = ruleFormulaMapper.getFormula(indexId);
-    if (ruleFormula != null) {
-      List<RuleFormulaParam> ruleFormulaParams = ruleFormulaMapper.getFormulaParam(indexId);
-      if (!ruleFormulaParams.isEmpty()) {
-        ruleFormula.setRuleFormulaParams(ruleFormulaParams);
-      }
-    } else {
-      ruleFormula = new RuleFormula();
+        return ruleFormula;
     }
-
-    return ruleFormula;
-  }
 
 }

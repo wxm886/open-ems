@@ -26,12 +26,14 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * 报警分析实现
- *
  */
 @Service
 @AllArgsConstructor
@@ -70,12 +72,18 @@ public class AlarmAnalyisisServiceImpl implements IAlarmAnalysisService {
 
         List<ChartData> chartDataList = new ArrayList<>();
         final String nodeId = alarmAnalysisDTO.getNodeId();
-        final Date queryTime = alarmAnalysisDTO.getDataTime();
-       
+        Date queryTime = alarmAnalysisDTO.getDataTime();
+        if (ObjectUtils.isEmpty(queryTime)) {
+            queryTime = new Date();
+        }
+
         Date beginTime;
         Date endTime;
         String timeFormat;
         String queryTimeType = alarmAnalysisDTO.getTimeType();
+        if (ObjectUtils.isEmpty(queryTimeType)) {
+            queryTimeType = TimeType.MONTH.name();
+        }
         if (TimeType.DAY.name().equals(queryTimeType)) {
             beginTime = DateUtil.beginOfDay(queryTime);
             endTime = DateUtil.endOfDay(queryTime);
@@ -93,11 +101,11 @@ public class AlarmAnalyisisServiceImpl implements IAlarmAnalysisService {
         }
         JkHistoryAlarm query = new JkHistoryAlarm();
         query.setEierarchyFlag("ALL");
-        query.setBeginTime(DateUtil.format(beginTime,"yyyy-MM-dd HH:mm:ss"));
-        query.setEndTime(DateUtil.format(endTime,"yyyy-MM-dd HH:mm:ss"));
+        query.setBeginTime(DateUtil.format(beginTime, "yyyy-MM-dd HH:mm:ss"));
+        query.setEndTime(DateUtil.format(endTime, "yyyy-MM-dd HH:mm:ss"));
         query.setNodeId(nodeId);
         final List<JkHistoryAlarm> jkHistoryAlarms = alarmHistoryMapper.selectJkHistoryAlarmList(query);
-        if(CollectionUtils.isNotEmpty(jkHistoryAlarms)) {
+        if (CollectionUtils.isNotEmpty(jkHistoryAlarms)) {
 
             // 设置能源类型
             processEnergyType(jkHistoryAlarms);
@@ -127,11 +135,11 @@ public class AlarmAnalyisisServiceImpl implements IAlarmAnalysisService {
         List<String> indexIds = jkHistoryAlarms.stream().map(JkHistoryAlarm::getIndexId).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(indexIds)) {
             List<EnergyTypeMeterPointVO> modelList = meterPointMapper.listEnergyTypeMeterPointByPointIds(indexIds);
-            if (CollectionUtils.isNotEmpty(modelList)){
+            if (CollectionUtils.isNotEmpty(modelList)) {
                 Map<String, String> energyMap = modelList.stream().collect(Collectors.toMap(EnergyTypeMeterPointVO::getIndexId, EnergyTypeMeterPointVO::getEnergyType));
 
                 jkHistoryAlarms.forEach(alarm -> {
-                    if (PointType.COLLECT.getDescription().equals(alarm.getIndexType()) && StringUtils.isEmpty(alarm.getEnergyId())){
+                    if (PointType.COLLECT.getDescription().equals(alarm.getIndexType()) && StringUtils.isEmpty(alarm.getEnergyId())) {
                         alarm.setEnergyId(energyMap.get(alarm.getIndexId()));
                     }
                 });
@@ -220,6 +228,7 @@ public class AlarmAnalyisisServiceImpl implements IAlarmAnalysisService {
 
     /**
      * 获取报警分析统计信息
+     *
      * @param alarmAnalysisDTO
      * @return
      */
@@ -229,7 +238,7 @@ public class AlarmAnalyisisServiceImpl implements IAlarmAnalysisService {
         AlarmAnalysisVO alarmAnalysisVO = new AlarmAnalysisVO();
 
         ModelNode parentNode = modelNodeMapper.selectModelNodeById(alarmAnalysisDTO.getNodeId());
-        if(ObjectUtils.isEmpty(parentNode)){
+        if (ObjectUtils.isEmpty(parentNode)) {
             return alarmAnalysisVO;
         }
 
@@ -247,8 +256,8 @@ public class AlarmAnalyisisServiceImpl implements IAlarmAnalysisService {
         DateTime endOfMonth = DateUtil.endOfMonth(new Date());
         DateTime beginOfYear = DateUtil.beginOfYear(new Date());
         DateTime endOfYear = DateUtil.endOfYear(new Date());
-        Integer monthCount = alarmHistoryMapper.selectCountByTime(beginOfMonth,endOfMonth, indexIdList);
-        Integer yearCount = alarmHistoryMapper.selectCountByTime(beginOfYear,endOfYear, indexIdList);
+        Integer monthCount = alarmHistoryMapper.selectCountByTime(beginOfMonth, endOfMonth, indexIdList);
+        Integer yearCount = alarmHistoryMapper.selectCountByTime(beginOfYear, endOfYear, indexIdList);
 
         alarmAnalysisVO.setMonthCount(monthCount);
         alarmAnalysisVO.setYearCount(yearCount);
