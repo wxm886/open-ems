@@ -35,7 +35,7 @@
 
 ## 在线体验
 
-#### guestUser/guest@123456
+#### 手机号体验登录
 
 #### 演示地址：https://demo-ems.zhitancloud.com/
 
