@@ -47,9 +47,19 @@ public interface AlarmItemMapper extends BaseMapper<AlarmItem> {
     List<AlarmItem> selectAlarmItemtingById(String id);
 
     /**
+     * 修改预报警设置
+     *
+     * @param ids       预报警设置
+     * @param update_by 预报警设置
+     * @param flag      预报警设置
      * @return 结果
      */
-    String getStartStop(String indexid);
+    int updateStartStop(@Param("ids") String[] ids, @Param("flag") String flag, @Param("update_by") String update_by);
+
+    /**
+     * @return 结果
+     */
+    String getStartStop(String pointId);
 
     /**
      * 修改【请填写功能名称】
